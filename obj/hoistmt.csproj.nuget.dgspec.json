@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/alex/Documents/hoistmt/hoistmt.csproj": {}
+    "/home/alex/hoistapp/hoistmt.csproj": {}
   },
   "projects": {
-    "/home/alex/Documents/hoistmt/hoistmt.csproj": {
+    "/home/alex/hoistapp/hoistmt.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/alex/Documents/hoistmt/hoistmt.csproj",
+        "projectUniqueName": "/home/alex/hoistapp/hoistmt.csproj",
         "projectName": "hoistmt",
-        "projectPath": "/home/alex/Documents/hoistmt/hoistmt.csproj",
+        "projectPath": "/home/alex/hoistapp/hoistmt.csproj",
         "packagesPath": "/home/alex/.nuget/packages/",
-        "outputPath": "/home/alex/Documents/hoistmt/obj/",
+        "outputPath": "/home/alex/hoistapp/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/alex/.nuget/NuGet/NuGet.Config"
