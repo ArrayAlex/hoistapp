@@ -15,12 +15,12 @@ namespace hoistmt
     {
 
         string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-        public Startup(IConfiguration configuration)
+        public Startup(IConfdiguration configuration)
         {
             Configuration = configuration;
         }
         
-        
+
 
         public IConfiguration Configuration { get; }
 
