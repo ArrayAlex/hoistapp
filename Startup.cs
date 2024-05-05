@@ -7,22 +7,20 @@ using Microsoft.Extensions.Hosting;
 using hoistmt.Data;
 using hoistmt.Middleware;
 using hoistmt.Services;
+using System;
 
 namespace hoistmt
 {
     public class Startup
-    
     {
+        public IConfiguration Configuration { get; }
 
         string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-        public Startup(IConfdiguration configuration)
+
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-        
-
-
-        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -130,6 +128,4 @@ namespace hoistmt
             });
         }
     }
-
-
 }
