@@ -11,11 +11,15 @@ using hoistmt.Services;
 namespace hoistmt
 {
     public class Startup
+    
     {
+
+        string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
+        
 
         public IConfiguration Configuration { get; }
 
@@ -23,20 +27,20 @@ namespace hoistmt
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowSpecificOrigin", builder =>
-                {
-                    builder.WithOrigins("http://localhost:3000") // Specify the origin(s) you want to allow
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials();
-                });
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                                policy =>
+                                {
+                                    policy.WithOrigins("https://hoist.nz",
+                                                        "http://hoist.nz").AllowAnyHeader().AllowAnyMethod();
+                                });
             });
-            
+
             services.AddSession(options =>
             {
                 options.Cookie.Name = "HoistSession"; // Set a custom session cookie name if needed
-                options.IdleTimeout = TimeSpan.FromMinutes(20); // Set the session timeout duration
-                // Configure other session options as needed
+                options.Cookie.Domain = ".hoist.nz"; // Set the domain attribute
+                options.IdleTimeout = TimeSpan.FromMinutes(120); // Set the session timeout duration
+                                                                // Configure other session options as needed
             });
             services.AddControllersWithViews();
             services.AddHttpContextAccessor();
@@ -45,7 +49,7 @@ namespace hoistmt
                 options.UseMySql(
                     Configuration.GetConnectionString("DefaultConnection"),
                     new MySqlServerVersion(new Version(8, 0, 23))));
-            
+
             services.AddDbContextFactory<TenantDbContext>(options =>
                 options.UseMySql(
                     Configuration.GetConnectionString("tenantConnection"),
@@ -55,8 +59,8 @@ namespace hoistmt
             services.AddScoped(typeof(ITenantDbContextResolver<>), typeof(TenantDbContextResolver<>));
             services.AddScoped<TenantService>();
             services.AddScoped<TokenHandler>();
-            
-            
+
+
             services.AddSingleton<JwtService>(provider =>
             {
                 var secretKey = "whatever12312312313asdasd2d2dw2d2wd";
@@ -64,7 +68,7 @@ namespace hoistmt
                 return new JwtService(secretKey, issuer);
             });
 
-            
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -78,12 +82,16 @@ namespace hoistmt
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
-            app.UseCors("AllowSpecificOrigin");
+            app.UseStaticFiles();
+            app.UseRouting();
+            app.UseCors(MyAllowSpecificOrigins);
+
+
             app.Use(async (context, next) =>
             {
                 if (context.Request.Method == "OPTIONS")
                 {
-                    context.Response.Headers.Append("Access-Control-Allow-Origin", "http://localhost:3000");
+                    context.Response.Headers.Append("Access-Control-Allow-Origin", "https://hoist.nz");
                     context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
                     context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type, Authorization");
                     context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
@@ -94,7 +102,7 @@ namespace hoistmt
                     await next();
                 }
             });
-            
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSession();
@@ -122,5 +130,5 @@ namespace hoistmt
         }
     }
 
-    
+
 }
