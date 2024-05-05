@@ -23,7 +23,7 @@ jobs:
           include-prerelease: true
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release hoistmt.csproj
+        run: dotnet build --configuration Release
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
@@ -52,9 +52,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D367909F258549D38CB345C02758C7D1 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5EB157340FBE4DC99057513BCF271675 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_99ECC91C10BD489EB47A6A64B808A553 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BD4F986C1DEB4B4E9F3E6E36812C520D }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E85A5CD220A34CFB8F768C0980079358 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_38896BBB605943FAB7B46ACB30FDDDB8 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
