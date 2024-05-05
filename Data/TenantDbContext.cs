@@ -15,6 +15,10 @@ namespace hoistmt.Data
         public DbSet<Account> accounts { get; set; }
 
         public DbSet<Customer> customers { get; set; }
+
+        public DbSet<invoiceEntry> invoiceEntries { get; set; }
+
+        public DbSet<Invoice> invoices { get; set; }
         
         public DbSet<eventAttribute> eventAttributes { get; set; }
         // Add other DbSet properties for entities related to tenant databases

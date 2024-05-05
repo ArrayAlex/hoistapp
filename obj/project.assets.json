@@ -909,24 +909,25 @@
     ]
   },
   "packageFolders": {
-    "/home/alex/.nuget/packages/": {}
+    "C:\\Users\\Nulle\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/alex/hoistapp/hoistmt.csproj",
+      "projectUniqueName": "C:\\Users\\Nulle\\hoistapp\\hoistmt.csproj",
       "projectName": "hoistmt",
-      "projectPath": "/home/alex/hoistapp/hoistmt.csproj",
-      "packagesPath": "/home/alex/.nuget/packages/",
-      "outputPath": "/home/alex/hoistapp/obj/",
+      "projectPath": "C:\\Users\\Nulle\\hoistapp\\hoistmt.csproj",
+      "packagesPath": "C:\\Users\\Nulle\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Nulle\\hoistapp\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/alex/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\Nulle\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -973,7 +974,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.102/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
