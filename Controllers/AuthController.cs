@@ -32,7 +32,7 @@ namespace hoistmt.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(LoginModel model)
         {
-            Console.WriteLine(model);
+           
             var dbContext = await _tenantDbContextResolver.GetTenantLoginDbContextAsync(model.Company);
             if (dbContext == null)
             {
@@ -40,13 +40,11 @@ namespace hoistmt.Controllers
                 return Unauthorized("Tenant database context not found");
             } 
 
-            Console.WriteLine("Tenant database context found");
-            Console.WriteLine(model.Username);
-            Console.WriteLine(model.Password);
+            
             var account = await dbContext.Set<Account>()
                 .FirstOrDefaultAsync(a => a.Username == model.Username && a.Password == model.Password);
 
-            Console.WriteLine(account);
+           
             if (account == null)
             {
                 Console.WriteLine("Invalid username or password");
@@ -65,6 +63,7 @@ namespace hoistmt.Controllers
                 ipAddress = HttpContext.Connection.RemoteIpAddress.ToString(),
                 ExpiresAt = DateTime.UtcNow.AddHours(1),
                 CompanyDb = HttpContext.Session.GetString("CompanyDb")
+                
                 // Add any other session properties you need
             };
 
@@ -72,6 +71,7 @@ namespace hoistmt.Controllers
 
             _context.sessions.Add(session);
             await _context.SaveChangesAsync();
+            Console.WriteLine(HttpContext.Session.Id);
 
             return Ok(new { Token = HttpContext.Session.Id });
         }

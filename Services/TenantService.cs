@@ -87,7 +87,6 @@ namespace hoistmt.Services
                             $"VALUES ('{user.Name}', '{user.Password}', '{user.Username}', '{user.email}', {user.Active}, {user.roleID}, '{user.roleName}', {phoneValue})";
 
             // Log the SQL statement before executing
-            Console.WriteLine("Generated SQL statement: " + insertSql);
 
             // Execute the SQL command
             await _context.Database.ExecuteSqlRawAsync(insertSql);

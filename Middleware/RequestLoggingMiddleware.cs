@@ -31,8 +31,7 @@ namespace hoistmt.Middleware
         private void LogRequest(HttpRequest request)
         {
             // Log request method and path
-            Console.WriteLine($"Request Method: {request.Method}");
-            Console.WriteLine($"Request Path: {request.Path}");
+          
 
             // Log request headers
             Console.WriteLine("Request Headers:");

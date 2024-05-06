@@ -97,14 +97,6 @@ namespace hoistmt.Controllers
             try
             {
 
-                Console.WriteLine("############################################################");
-                Console.WriteLine(appointment.id);
-                Console.WriteLine(appointment.title);
-                Console.WriteLine(appointment.backgroundColor);
-                Console.WriteLine(appointment.start_time);
-                Console.WriteLine(appointment.end_time);
-                Console.WriteLine(appointment.description);
-                Console.WriteLine(appointment.notes);
 
                 // Get the application db context
                 var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
@@ -130,8 +122,7 @@ namespace hoistmt.Controllers
                 appointmentEntity.eventID = appointment.eventID;
                 appointmentEntity.Active = 1;
 
-                Console.WriteLine(appointmentEntity.start_time);
-                Console.WriteLine(appointmentEntity.end_time);
+           
 
                 // Save changes to the database
                 await dbContext.SaveChangesAsync();

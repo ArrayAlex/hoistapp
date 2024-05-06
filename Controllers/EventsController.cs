@@ -71,14 +71,6 @@ namespace hoistmt.Controllers
             try
             {
             
-                Console.WriteLine("############################################################");
-                Console.WriteLine(appointment.id);
-                Console.WriteLine(appointment.title);
-                Console.WriteLine(appointment.backgroundColor);
-                Console.WriteLine(appointment.start_time);
-                Console.WriteLine(appointment.end_time);
-                Console.WriteLine(appointment.description);
-                Console.WriteLine(appointment.notes);
                 
                 // Get the application db context
                 var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
@@ -102,8 +94,6 @@ namespace hoistmt.Controllers
                 appointmentEntity.notes = string.IsNullOrEmpty(appointment.notes) ? null : appointment.notes;
                 appointmentEntity.lastModified = DateTime.Now;
 
-                Console.WriteLine(appointmentEntity.start_time);
-                Console.WriteLine(appointmentEntity.end_time);
 
                 // Save changes to the database
                 await dbContext.SaveChangesAsync();
