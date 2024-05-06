@@ -30,7 +30,10 @@ namespace hoistmt
                                 policy =>
                                 {
                                     policy.WithOrigins("https://hoist.nz",
-                                                        "http://hoist.nz").AllowAnyHeader().AllowAnyMethod();
+                                                    "http://hoist.nz")
+                                        .AllowAnyHeader()
+                                        .AllowAnyMethod()
+                                        .AllowCredentials(); // Allow credentials (cookies)
                                 });
             });
 
