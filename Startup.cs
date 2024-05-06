@@ -24,14 +24,15 @@ namespace hoistmt
 
         public void ConfigureServices(IServiceCollection services)
         {
-             services.AddCors(options =>
+            services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                 policy =>
                                 {
-                                    policy.AllowAnyOrigin() // Allow any origin
+                                    policy.WithOrigins("https://hoist.nz") // Allow only hoist.nz origin
                                         .AllowAnyHeader()
-                                        .AllowAnyMethod();// Allow credentials (cookies)
+                                        .AllowAnyMethod() 
+                                        .AllowCredentials();    
                                 });
             });
 
