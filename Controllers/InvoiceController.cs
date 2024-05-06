@@ -104,8 +104,6 @@ namespace hoistmt.Controllers
             }
         }
 
-
-
         [HttpPut("update")]
         public async Task<bool> UpdateInvoice([FromQuery] string token, Invoice Invoice)
         {
