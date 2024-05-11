@@ -29,7 +29,7 @@ namespace hoistmt
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                 policy =>
                                 {
-                                    policy.WithOrigins("https://hoist.nz", "http://localhost:4200", "http://localhost:4200/") // Allow only hoist.nz origin
+                                    policy.WithOrigins("https://hoist.nz",  "http://localhost:5173") // Allow only hoist.nz origin
                                         .AllowAnyHeader()
                                         .AllowAnyMethod() 
                                         .AllowCredentials();    
@@ -38,10 +38,30 @@ namespace hoistmt
 
             services.AddSession(options =>
             {
-                options.Cookie.Name = "HoistSession"; // Set a custom session cookie name if needed
-                options.Cookie.Domain = ".hoist.nz"; // Set the domain attribute
+                string environment = System.Environment.GetEnvironmentVariable("ENV");
+                options.Cookie.Name = "HoistSession";
+                if (environment == "production")
+                {
+                    Console.WriteLine("running in production enviroment");
+                    options.Cookie.Domain = ".hoist.nz";
+                }
+                else
+                {
+                    Console.WriteLine("running in development enviroment");
+                    options.Cookie.Domain = "localhost"; 
+                }
+
+               
+                    
+                
                 options.IdleTimeout = TimeSpan.FromMinutes(120); // Set the session timeout duration
-                                                                // Configure other session options as needed
+
+                // Get environment variables
+                
+
+                // You can use the retrieved environment variable value here or elsewhere in your code
+
+                // Configure other session options as needed
             });
             services.AddControllersWithViews();
             services.AddHttpContextAccessor();
