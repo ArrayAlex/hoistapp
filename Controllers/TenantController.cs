@@ -27,7 +27,15 @@ namespace hoistmt.Controllers
         {
             try
             {
+                if(newUser.DatabaseName == "" || newUser.Name == "" || newUser.email == "" || newUser.Password == ""  || newUser.Username == "")
+                {
+                    return BadRequest("All fields are required. ");
+                }
+                {
+                    return BadRequest("DatabaseName is required. ");
+                }
                 var existingTenant = await _context.Tenants.FirstOrDefaultAsync(t => t.DatabaseName == newUser.DatabaseName);
+                
                 if (existingTenant != null)
                 {
                     // DatabaseName is already taken, return appropriate response

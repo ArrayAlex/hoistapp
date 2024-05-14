@@ -32,7 +32,10 @@ namespace hoistmt.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(LoginModel model)
         {
-           
+            if (model.Company == "" || model.Password == "" || model.Username == "")
+            {
+                return BadRequest("All fields required");
+            }
             var dbContext = await _tenantDbContextResolver.GetTenantLoginDbContextAsync(model.Company);
             if (dbContext == null)
             {
