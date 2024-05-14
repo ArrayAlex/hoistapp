@@ -29,7 +29,7 @@ namespace hoistmt
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                 policy =>
                                 {
-                                    policy.WithOrigins("https://hoist.nz") // Allow only hoist.nz origin
+                                    policy.WithOrigins("https://hoist.nz", "http://localhost:5173")
                                         .AllowAnyHeader()
                                         .AllowAnyMethod() 
                                         .AllowCredentials();    
@@ -40,18 +40,9 @@ namespace hoistmt
             {
                 string environment = System.Environment.GetEnvironmentVariable("environment");
                 options.Cookie.Name = "HoistSession";
-                /*if (environment == "production")
-                {
-                    Console.WriteLine("running in production enviroment");
-                    options.Cookie.Domain = ".hoist.nz";
-                }
-                else
-                {
-                    Console.WriteLine("running in development enviroment");
-                    options.Cookie.Domain = "localhost"; 
-                }*/
+              
                 options.Cookie.Domain = ".hoist.nz";
-               
+                // options.Cookie.Domain = "localhost"; 
                     
                 
                 options.IdleTimeout = TimeSpan.FromMinutes(120); // Set the session timeout duration
