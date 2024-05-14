@@ -38,22 +38,25 @@ namespace hoistmt
 
             services.AddSession(options =>
             {
-                string environment = System.Environment.GetEnvironmentVariable("environment");
                 options.Cookie.Name = "HoistSession";
-              
-                options.Cookie.Domain = ".hoist.nz";
-                // options.Cookie.Domain = "localhost"; 
-                    
-                
+
+                // Determine the domain based on the environment
+                string cookieDomain = Environment.GetEnvironmentVariable("COOKIE_DOMAIN");
+                if (!string.IsNullOrEmpty(cookieDomain))
+                {
+                    options.Cookie.Domain = cookieDomain;
+                }
+                else
+                {
+                    // Fallback to localhost if COOKIE_DOMAIN environment variable is not set
+                    options.Cookie.Domain = "localhost";
+                }
+    
                 options.IdleTimeout = TimeSpan.FromMinutes(120); // Set the session timeout duration
-
-                // Get environment variables
-                
-
-                // You can use the retrieved environment variable value here or elsewhere in your code
 
                 // Configure other session options as needed
             });
+
             services.AddControllersWithViews();
             services.AddHttpContextAccessor();
             // Add your database context

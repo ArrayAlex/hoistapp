@@ -7,7 +7,7 @@ using hoistmt.Models;
 
 namespace hoistmt.Services
 {
-    public class JwtService
+    public class JwtService 
     {
         private readonly string _secretKey;
         private readonly string _issuer;
