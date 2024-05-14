@@ -40,7 +40,7 @@ namespace hoistmt
             {
                 string environment = System.Environment.GetEnvironmentVariable("ENV");
                 options.Cookie.Name = "HoistSession";
-                if (environment == "production")
+                if (environment != "development")
                 {
                     Console.WriteLine("running in production enviroment");
                     options.Cookie.Domain = ".hoist.nz";
