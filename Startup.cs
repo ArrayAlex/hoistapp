@@ -29,7 +29,7 @@ namespace hoistmt
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                 policy =>
                                 {
-                                    policy.WithOrigins("https://hoist.nz",  "http://localhost:5173") // Allow only hoist.nz origin
+                                    policy.WithOrigins("https://hoist.nz") // Allow only hoist.nz origin
                                         .AllowAnyHeader()
                                         .AllowAnyMethod() 
                                         .AllowCredentials();    
