@@ -41,7 +41,7 @@ namespace hoistmt
                 options.Cookie.Name = "HoistSession";
 
                 // Determine the domain based on the environment
-                string cookieDomain = Environment.GetEnvironmentVariable("COOKIE_DOMAIN");
+                string cookieDomain = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
                 if (!string.IsNullOrEmpty(cookieDomain))
                 {
                     options.Cookie.Domain = cookieDomain;
