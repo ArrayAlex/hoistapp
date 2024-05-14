@@ -31,8 +31,8 @@ namespace hoistmt
                                 {
                                     policy.WithOrigins("https://hoist.nz", "http://localhost:5173")
                                         .AllowAnyHeader()
-                                        .AllowAnyMethod() 
-                                        .AllowCredentials();    
+                                        .AllowAnyMethod()
+                                        .AllowCredentials();
                                 });
             });
 
@@ -41,17 +41,9 @@ namespace hoistmt
                 options.Cookie.Name = "HoistSession";
 
                 // Determine the domain based on the environment
-                string cookieDomain = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-                if (!string.IsNullOrEmpty(cookieDomain))
-                {
-                    options.Cookie.Domain = cookieDomain;
-                }
-                else
-                {
-                    // Fallback to localhost if COOKIE_DOMAIN environment variable is not set
-                    options.Cookie.Domain = "localhost";
-                }
-    
+                string cookieDomain = Configuration["COOKIE_DOMAIN"] ?? "localhost";
+                options.Cookie.Domain = cookieDomain;
+
                 options.IdleTimeout = TimeSpan.FromMinutes(120); // Set the session timeout duration
 
                 // Configure other session options as needed
@@ -78,12 +70,10 @@ namespace hoistmt
 
             services.AddSingleton<JwtService>(provider =>
             {
-                var secretKey = "whatever12312312313asdasd2d2dw2d2wd";
-                var issuer = "whatever1231231231232wd2d2d2dwd2wdw2dwd2";
+                var secretKey = Configuration["JWT_SECRET_KEY"] ?? "default_secret_key";
+                var issuer = Configuration["JWT_ISSUER"] ?? "default_issuer";
                 return new JwtService(secretKey, issuer);
             });
-
-
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

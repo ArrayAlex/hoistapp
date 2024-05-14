@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Po+jV4c5eYTh4/EsTiZexbWTjyCUb6oUrU+ZqsVN/crE5tr0WNR/y9r4DXdH5/nuUwVNPTSUrwJQ8wiHDykvGw==",
+  "dgSpecHash": "ecPsSYbbhafq9v0n8y4dlAQFIUWgRYn4uR1f5WsrkoijsQW8gpzV+aHgH5TIcKKpTV1d/M2ZAY74XJt9+Z5ULQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\Nulle\\Documents\\hoistappnz\\hoistmt.csproj",
   "expectedPackageFiles": [
@@ -10,7 +10,9 @@
     "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\8.0.2\\microsoft.entityframeworkcore.relational.8.0.2.nupkg.sha512",
     "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\8.0.0\\microsoft.extensions.caching.abstractions.8.0.0.nupkg.sha512",
     "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.extensions.caching.memory\\8.0.0\\microsoft.extensions.caching.memory.8.0.0.nupkg.sha512",
+    "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.extensions.configuration\\8.0.0\\microsoft.extensions.configuration.8.0.0.nupkg.sha512",
     "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\8.0.0\\microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.extensions.configuration.environmentvariables\\8.0.0\\microsoft.extensions.configuration.environmentvariables.8.0.0.nupkg.sha512",
     "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\8.0.0\\microsoft.extensions.dependencyinjection.8.0.0.nupkg.sha512",
     "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
     "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.extensions.logging\\8.0.0\\microsoft.extensions.logging.8.0.0.nupkg.sha512",
