@@ -34,7 +34,8 @@ namespace hoistmt.Controllers
                     return Conflict("DatabaseName is already taken. ");
                 }
                 var createdTenant = await _tenantService.CreateTenant(newUser);
-                return CreatedAtAction(nameof(GetTenant), new { id = createdTenant.Id }, createdTenant);
+                // CreatedAtAction(nameof(GetTenant), new { id = createdTenant.Id }, createdTenant);
+                return Ok();
             }
             catch (NotFoundException ex)
             {
