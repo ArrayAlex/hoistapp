@@ -38,9 +38,9 @@ namespace hoistmt
 
             services.AddSession(options =>
             {
-                string environment = System.Environment.GetEnvironmentVariable("ENV");
+                string environment = System.Environment.GetEnvironmentVariable("environment");
                 options.Cookie.Name = "HoistSession";
-                if (environment != "development")
+                if (environment == "production")
                 {
                     Console.WriteLine("running in production enviroment");
                     options.Cookie.Domain = ".hoist.nz";

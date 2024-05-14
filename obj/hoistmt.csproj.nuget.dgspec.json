@@ -1,25 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "/home/alex/hoistapp-1/hoistmt.csproj": {}
+    "C:\\Users\\Nulle\\Documents\\hoistappnz\\hoistmt.csproj": {}
   },
   "projects": {
-    "/home/alex/hoistapp-1/hoistmt.csproj": {
+    "C:\\Users\\Nulle\\Documents\\hoistappnz\\hoistmt.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/alex/hoistapp-1/hoistmt.csproj",
+        "projectUniqueName": "C:\\Users\\Nulle\\Documents\\hoistappnz\\hoistmt.csproj",
         "projectName": "hoistmt",
-        "projectPath": "/home/alex/hoistapp-1/hoistmt.csproj",
-        "packagesPath": "/home/alex/.nuget/packages/",
-        "outputPath": "/home/alex/hoistapp-1/obj/",
+        "projectPath": "C:\\Users\\Nulle\\Documents\\hoistappnz\\hoistmt.csproj",
+        "packagesPath": "C:\\Users\\Nulle\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Nulle\\Documents\\hoistappnz\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/alex/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Nulle\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -38,6 +39,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.4, )"
+            },
             "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",
               "version": "[8.0.2, )"
@@ -66,7 +71,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
