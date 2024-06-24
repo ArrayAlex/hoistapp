@@ -106,7 +106,6 @@ C:/Users/Nulle/Documents/hoistappnz/obj/Debug/net8.0/staticwebassets/msbuild.bui
 C:/Users/Nulle/Documents/hoistappnz/obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.hoistmt.props
 C:/Users/Nulle/Documents/hoistappnz/obj/Debug/net8.0/staticwebassets.pack.json
 C:/Users/Nulle/Documents/hoistappnz/obj/Debug/net8.0/scopedcss/bundle/hoistmt.styles.css
-C:/Users/Nulle/Documents/hoistappnz/obj/Debug/net8.0/hoistmt.csproj.CopyComplete
 C:/Users/Nulle/Documents/hoistappnz/obj/Debug/net8.0/hoistmt.dll
 C:/Users/Nulle/Documents/hoistappnz/obj/Debug/net8.0/refint/hoistmt.dll
 C:/Users/Nulle/Documents/hoistappnz/obj/Debug/net8.0/hoistmt.pdb
@@ -182,9 +181,12 @@ C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\staticwebassets\msbuild.bui
 C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.hoistmt.props
 C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\staticwebassets.pack.json
 C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\scopedcss\bundle\hoistmt.styles.css
-C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\hoistmt.csproj.CopyComplete
 C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\hoistmt.dll
 C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\refint\hoistmt.dll
 C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\hoistmt.pdb
 C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\hoistmt.genruntimeconfig.cache
 C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\ref\hoistmt.dll
+C:\Users\Nulle\Documents\hoistappnz\bin\Debug\net8.0\hoistmt.staticwebassets.endpoints.json
+C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\staticwebassets\msbuild.hoistmt.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\hoistmt.csproj.Up2Date

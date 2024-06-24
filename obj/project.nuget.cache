@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "ecPsSYbbhafq9v0n8y4dlAQFIUWgRYn4uR1f5WsrkoijsQW8gpzV+aHgH5TIcKKpTV1d/M2ZAY74XJt9+Z5ULQ==",
+  "dgSpecHash": "3PWzmk78TmE=",
   "success": true,
   "projectFilePath": "C:\\Users\\Nulle\\Documents\\hoistappnz\\hoistmt.csproj",
   "expectedPackageFiles": [
@@ -25,7 +25,11 @@
     "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.identitymodel.tokens\\7.5.0\\microsoft.identitymodel.tokens.7.5.0.nupkg.sha512",
     "C:\\Users\\Nulle\\.nuget\\packages\\mysqlconnector\\2.3.5\\mysqlconnector.2.3.5.nupkg.sha512",
     "C:\\Users\\Nulle\\.nuget\\packages\\pomelo.entityframeworkcore.mysql\\8.0.2\\pomelo.entityframeworkcore.mysql.8.0.2.nupkg.sha512",
-    "C:\\Users\\Nulle\\.nuget\\packages\\system.identitymodel.tokens.jwt\\7.5.0\\system.identitymodel.tokens.jwt.7.5.0.nupkg.sha512"
+    "C:\\Users\\Nulle\\.nuget\\packages\\system.identitymodel.tokens.jwt\\7.5.0\\system.identitymodel.tokens.jwt.7.5.0.nupkg.sha512",
+    "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.5\\microsoft.netcore.app.ref.8.0.5.nupkg.sha512",
+    "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.5\\microsoft.windowsdesktop.app.ref.8.0.5.nupkg.sha512",
+    "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.5\\microsoft.aspnetcore.app.ref.8.0.5.nupkg.sha512",
+    "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.5\\microsoft.netcore.app.host.win-x64.8.0.5.nupkg.sha512"
   ],
   "logs": []
 }

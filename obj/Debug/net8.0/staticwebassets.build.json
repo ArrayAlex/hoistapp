@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "Xdnar3vpk9N5H+djhBjB5yF8YPfxjiu9evizpZyM3OI=",
+  "Hash": "kji0SH39BMKF65UVuG6nXpfXXAcp9lmbzr+AKaV9Pfo=",
   "Source": "hoistmt",
   "BasePath": "_content/hoistmt",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }

@@ -30,7 +30,7 @@ namespace hoistmt.Controllers
             var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
             if (dbContext == null)
             {
-                return NotFound("Tenant DbContext not available for the retrieved database.");
+                return NotFound("Tenant DContext not available for the retrieved database.");
             }
 
             try
