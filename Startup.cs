@@ -8,6 +8,7 @@ using hoistmt.Data;
 using hoistmt.Middleware;
 using hoistmt.Services;
 using System;
+using hoistmt.Functions;
 using hoistmt.HttpClients;
 
 namespace hoistmt
@@ -54,7 +55,7 @@ namespace hoistmt
             services.AddHttpContextAccessor();
             services.AddHttpClient<RegoSearch>();
             // Add your database context
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<MasterDbContext>(options =>
                 options.UseMySql(
                     Configuration.GetConnectionString("DefaultConnection"),
                     new MySqlServerVersion(new Version(8, 0, 23))));
@@ -68,7 +69,7 @@ namespace hoistmt
             services.AddScoped(typeof(ITenantDbContextResolver<>), typeof(TenantDbContextResolver<>));
             services.AddScoped<TenantService>();
             services.AddScoped<TokenHandler>();
-
+            services.AddScoped<Credits>();
 
             services.AddSingleton<JwtService>(provider =>
             {

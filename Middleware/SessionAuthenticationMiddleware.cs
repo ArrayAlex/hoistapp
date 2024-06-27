@@ -22,7 +22,7 @@ namespace hoistmt.Middleware
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task Invoke(HttpContext context, ApplicationDbContext dbContext)
+        public async Task Invoke(HttpContext context, MasterDbContext dbContext)
         {
             // Check if the request path matches any of the ignored endpoints
             

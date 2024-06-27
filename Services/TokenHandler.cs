@@ -8,9 +8,9 @@ namespace hoistmt.Services
 {
     public class TokenHandler
     {
-        private readonly ApplicationDbContext _context;
+        private readonly MasterDbContext _context;
 
-        public TokenHandler(ApplicationDbContext context)
+        public TokenHandler(MasterDbContext context)
         {
             _context = context;
         }

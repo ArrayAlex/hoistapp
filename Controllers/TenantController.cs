@@ -11,11 +11,11 @@ namespace hoistmt.Controllers
     public class TenantController : ControllerBase
     {
         
-        private readonly ApplicationDbContext _context;
+        private readonly MasterDbContext _context;
         private readonly TenantService _tenantService;
 
     
-        public TenantController(ApplicationDbContext context, TenantService tenantService)
+        public TenantController(MasterDbContext context, TenantService tenantService)
         {
             _context = context;
             _tenantService = tenantService;

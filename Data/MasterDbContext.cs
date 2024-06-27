@@ -1,17 +1,19 @@
 ﻿using hoistmt.Models;
+using hoistmt.Models.MasterDbModels;
 
 namespace hoistmt.Data;
 using Microsoft.EntityFrameworkCore;
 
-public class ApplicationDbContext : DbContext
+public class MasterDbContext : DbContext
 {
     
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    public MasterDbContext(DbContextOptions<MasterDbContext> options) : base(options)
     {
     }
     
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<Session> sessions { get; set; }
+    public DbSet<Companies> Companies { get; set; }
     
     public DbSet<Vehicle> vehicles { get; set; }
     public DbSet<Appointment> appointments { get; set; }

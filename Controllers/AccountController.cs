@@ -13,9 +13,9 @@ namespace hoistmt.Controllers
     public class AccountController : ControllerBase
     {
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
-        private readonly ApplicationDbContext _context;
+        private readonly MasterDbContext _context;
 
-        public AccountController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, ApplicationDbContext context)
+        public AccountController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, MasterDbContext context)
         {
             _tenantDbContextResolver = tenantDbContextResolver;
             _context = context;

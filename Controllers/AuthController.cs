@@ -13,14 +13,14 @@ namespace hoistmt.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly MasterDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly JwtService _jwtService;
         private readonly TokenHandler _tokenHandler; 
 
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
 
-        public AuthController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, ApplicationDbContext context, IConfiguration configuration, JwtService jwtService, TokenHandler tokenHandler)
+        public AuthController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, MasterDbContext context, IConfiguration configuration, JwtService jwtService, TokenHandler tokenHandler)
         {
             _tenantDbContextResolver = tenantDbContextResolver;
             _context = context;

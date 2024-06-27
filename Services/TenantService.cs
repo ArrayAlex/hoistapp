@@ -9,9 +9,9 @@ namespace hoistmt.Services
 {
     public class TenantService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly MasterDbContext _context;
 
-        public TenantService(ApplicationDbContext context)
+        public TenantService(MasterDbContext context)
         {
             _context = context;
         }

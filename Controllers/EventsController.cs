@@ -15,10 +15,10 @@ namespace hoistmt.Controllers
     public class EventsController : ControllerBase
     {
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
-        private readonly ApplicationDbContext _context;
+        private readonly MasterDbContext _context;
 
         public EventsController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver,
-            ApplicationDbContext context)
+            MasterDbContext context)
         {
             _tenantDbContextResolver = tenantDbContextResolver;
             _context = context;
