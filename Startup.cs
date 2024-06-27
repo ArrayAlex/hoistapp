@@ -77,9 +77,11 @@ namespace hoistmt
                 var issuer = Configuration["JWT_ISSUER"] ?? "default_issuer";
                 return new JwtService(secretKey, issuer);
             });
+
+            services.AddTransient<DatabaseInitializer>();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,DatabaseInitializer dbInitializer)
         {
             if (env.IsDevelopment())
             {
@@ -135,6 +137,9 @@ namespace hoistmt
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            var task = dbInitializer.InitializeAsync();
+            task.Wait();
         }
     }
 }

@@ -32,7 +32,7 @@ namespace hoistmt.Services
             if (existingTenant != null)
             {
                 // DatabaseName is already taken, return appropriate response
-                throw new ConflictException("DatabaseName is already taken.");
+                Console.WriteLine("DatabaseName is already taken.");
             }
             // Add the new tenant to the Tenants table
             _context.Tenants.Add(tenant);
