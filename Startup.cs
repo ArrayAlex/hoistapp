@@ -8,6 +8,7 @@ using hoistmt.Data;
 using hoistmt.Middleware;
 using hoistmt.Services;
 using System;
+using hoistmt.HttpClients;
 
 namespace hoistmt
 {
@@ -51,6 +52,7 @@ namespace hoistmt
 
             services.AddControllersWithViews();
             services.AddHttpContextAccessor();
+            services.AddHttpClient<RegoSearch>();
             // Add your database context
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySql(
