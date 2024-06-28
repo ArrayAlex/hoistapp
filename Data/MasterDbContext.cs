@@ -16,6 +16,7 @@ public class MasterDbContext : DbContext
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<Session> sessions { get; set; }
     public DbSet<VehicleData> vehicledata { get; set; }
+    public DbSet<TenantTransactions> tenanttransactions { get; set; }
     
     public DbSet<Companies> Companies { get; set; }
     public DbSet<Vehicle> Vehicles { get; set; }

@@ -1,7 +1,8 @@
 ﻿
 using hoistmt.Models;
+using hoistmt.Models.MasterDbModels;
 using Microsoft.EntityFrameworkCore;
-
+using Vehicle = hoistmt.Models.Vehicle;
 
 
 public class TenantDbContext : DbContext
@@ -11,6 +12,8 @@ public class TenantDbContext : DbContext
     public DbSet<Vehicle> vehicles { get; set; }
     public DbSet<Appointment> appointments { get; set; }
     public DbSet<UserAccount> accounts { get; set; }
+    
+    public DbSet<TenantTransactions> tenanttransactions { get; set; }
     public DbSet<Customer> customers { get; set; }
     public DbSet<invoiceEntry> invoiceEntries { get; set; }
     public DbSet<Invoice> invoices { get; set; }
