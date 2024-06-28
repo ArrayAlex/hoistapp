@@ -1,4 +1,5 @@
-﻿using hoistmt.Models;
+﻿using hoistmt.Functions;
+using hoistmt.Models;
 
 using hoistmt.Models.MasterDbModels;
 using VehicleData = hoistmt.Models.MasterDbModels.Vehicle;
@@ -16,7 +17,7 @@ public class MasterDbContext : DbContext
     public DbSet<Session> sessions { get; set; }
     public DbSet<VehicleData> vehicledata { get; set; }
     public DbSet<TenantTransactions> tenanttransactions { get; set; }
-    
+    public DbSet<Subscription> plansubscriptions { get; set; }
     public DbSet<Companies> Companies { get; set; }
     public DbSet<Vehicle> Vehicles { get; set; }
     public DbSet<Appointment> Appointments { get; set; }

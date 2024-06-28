@@ -8,5 +8,7 @@ public class Companies
     public int _id { get; set; }
     public string CompanyID { get; set; }
     public double Credits { get; set; }
+    public string PlanName { get; set; }
+    public int PlanID { get; set; }
     
 }

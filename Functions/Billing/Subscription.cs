@@ -9,12 +9,11 @@ public class Subscription
     public decimal AnnualCost { get; set; }
     public int MaxUsers { get; set; }
     public int StorageLimitGB { get; set; }
-    public string SupportLevel { get; set; }
-    public string AccessFeatureA { get; set; }
-    public string AccessFeatureB { get; set; }
-    public string AccessFeatureC { get; set; }
-    public string AccessFeatureD { get; set; }
-    public string AccessFeatureE { get; set; }
+    public Boolean AccessFeatureA { get; set; }
+    public Boolean AccessFeatureB { get; set; }
+    public Boolean AccessFeatureC { get; set; }
+    public Boolean AccessFeatureD { get; set; }
+    public Boolean AccessFeatureE { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
