@@ -2,11 +2,10 @@
 using hoistmt.Models;
 using hoistmt.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using hoistmt.Functions;
-using hoistmt.Models.Account;
 
+using hoistmt.Functions;
+
+using hoistmt.Models.Account;
 
 namespace hoistmt.Controllers
 {
@@ -16,19 +15,26 @@ namespace hoistmt.Controllers
     {
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
         private readonly MasterDbContext _context;
-        private Credits _credits;
+        private readonly Credits _credits;
+        private readonly AccountSubscription _accountSubscription;
 
-        public ManagementController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, MasterDbContext context, Credits credits)
+        public ManagementController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver,
+            MasterDbContext context, Credits credits, AccountSubscription accountSubscription)
         {
             _tenantDbContextResolver = tenantDbContextResolver;
             _context = context;
             _credits = credits;
+            _accountSubscription = accountSubscription;
         }
-        
-        
-        [HttpGet("Accounts")]
-        public async Task<ActionResult<IEnumerable<UserAccount>>> GetAccounts([FromQuery] string token)
+
+        [HttpPost("AddAccount")]
+        public async Task<ActionResult<UserAccount>> AddAccount([FromBody] UserAccount model)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             // Use TenantDbContextResolver to get the tenant-specific DbContext
             var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
             if (dbContext == null)
@@ -36,47 +42,32 @@ namespace hoistmt.Controllers
                 return NotFound("Tenant DbContext not available for the retrieved database.");
             }
 
-            // Your logic here to use the token parameter
-            var accounts = await dbContext.accounts.ToListAsync(); // Correct casing here
-            return Ok(accounts);
-        }
-
-        [HttpGet("Account")]
-        public async Task<ActionResult<UserAccount>> GetAccountById()
-        {
-            // Use TenantDbContextResolver to get the tenant-specific DbContext
-            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-            if (dbContext == null)
+            // Check if there is a free user slot
+            if (!await _accountSubscription.HasFreeUserSlot(HttpContext.Session.GetString("CompanyDb")))
             {
-                return NotFound("Tenant DbContext not available for the retrieved database.");
+                return BadRequest("No free user slots available.");
             }
 
-            // Retrieve the user ID from the session
-            int? userId = HttpContext.Session.GetInt32("userid");
-            if (userId == null)
+            // Create a new UserAccount object
+            var newUserAccount = new UserAccount
             {
-                return Unauthorized("User ID not found in session or invalid format.");
-            }
-
-            // Retrieve the account from the database based on the user ID
-            var account = await dbContext.accounts.FindAsync(userId);
-            if (account == null)
-            {
-                return NotFound("Account not found.");
-            }
-
-            // Retrieve the CompanyDb from the session
-            var companyDb = HttpContext.Session.GetString("CompanyDb");
-
-            // Create an anonymous object containing both account and CompanyDb
-            var response = new
-            {
-                Account = account,
-                CompanyDb = companyDb
+                Name = model.Name,
+                Password = model.Password,
+                contact = model.contact,
+                email = model.email,
+                Active = model.Active,
+                Username = model.Username,
+                roleName = model.roleName,
+                position = model.position,
+                phone = model.phone,
+                roleID = model.roleID
             };
 
-            // Return the response with both account and CompanyDb
-            return Ok(response);
+            // Add the new account to the database
+            dbContext.accounts.Add(newUserAccount);
+            await dbContext.SaveChangesAsync();
+
+            return Ok(newUserAccount);
         }
 
         [HttpGet("AvailableCredits")]
@@ -85,6 +76,4 @@ namespace hoistmt.Controllers
             return await _credits.GetCredits(HttpContext.Session.GetString("CompanyDb"));
         }
     }
-
-    
 }

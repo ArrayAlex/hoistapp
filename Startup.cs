@@ -68,6 +68,7 @@ public class Startup
         services.AddScoped<TenantService>();
         services.AddScoped<TokenHandler>();
         services.AddScoped<Credits>();
+        services.AddScoped<AccountSubscription >();
 
         services.AddSingleton<JwtService>(provider =>
         {
