@@ -28,7 +28,7 @@ public class Credits
         return company.Credits > 0;
     }
         
-    public async Task<bool> TryDeductCreditsAsync(string companyID, double amount)
+    public async Task<bool> TryDeductCreditsAsync(string companyID, double amount, string extra = null)
     {
         using (var transaction = await _context.Database.BeginTransactionAsync())
         {
@@ -49,7 +49,7 @@ public class Credits
                     TenantId = companyID,
                     Amount = amount,
                     Date = DateTime.UtcNow,
-                    Description = "Rego Search",
+                    Description = "Rego Search "  + extra,
                     TransactionType = "Deduction",
                     Status = "Completed",
                     PaymentMethod = "Credits",

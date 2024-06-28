@@ -45,7 +45,7 @@ public class RegoSearch
         if (existingVehicle != null)
         {
             _logger.LogInformation("Vehicle found in the database.");
-            if (await _credits.TryDeductCreditsAsync(companyId, 0.15)) // Deduct 15 cents
+            if (await _credits.TryDeductCreditsAsync(companyId, 0.15, rego)) // Deduct 15 cents
             {
                 return (ConvertToRegoData(existingVehicle), null);
             }
@@ -83,9 +83,9 @@ public class RegoSearch
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Vehicle data fetched from API and saved to the database.");
-            if (await _credits.TryDeductCreditsAsync(companyId, 0.21)) // Deduct 21 cents
+            if (await _credits.TryDeductCreditsAsync(companyId, 0.23, rego)) // Deduct 21 cents
             {
-                return (data, null);
+                return (data, null); 
             }
             else
             {
