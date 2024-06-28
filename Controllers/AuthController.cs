@@ -27,7 +27,7 @@ namespace hoistmt.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(LoginModel model)
+        public async Task<ActionResult<object>> Login(LoginModel model)
         {
             if (string.IsNullOrEmpty(model.Company) || string.IsNullOrEmpty(model.Password) ||
                 string.IsNullOrEmpty(model.Username))
@@ -101,7 +101,22 @@ namespace hoistmt.Controllers
             Console.WriteLine(HttpContext.Session.GetInt32("MaxUsers"));
             
 
-            return Ok(new { Token = HttpContext.Session.Id });
+            return Ok(new
+            {
+                Token = HttpContext.Session.Id,
+                Plan = new
+                {
+                    PlanID = plan.id,
+                    PlanName = plan.PlanName,
+                    StorageLimitGB = plan.StorageLimitGB,
+                    MaxUsers = plan.MaxUsers,
+                    AccessFeatureA = plan.AccessFeatureA,
+                    AccessFeatureB = plan.AccessFeatureB,
+                    AccessFeatureC = plan.AccessFeatureC,
+                    AccessFeatureD = plan.AccessFeatureD,
+                    AccessFeatureE = plan.AccessFeatureE
+                }
+            });
         }
 
         [HttpOptions("login")]
