@@ -232,3 +232,9 @@ C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\refint\hoistmt.dll
 C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\hoistmt.pdb
 C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\hoistmt.genruntimeconfig.cache
 C:\Users\Nulle\Documents\hoistappnz\obj\Debug\net8.0\ref\hoistmt.dll
+C:\Users\Nulle\Documents\hoistappnz\bin\Debug\net8.0\Microsoft.Extensions.Caching.StackExchangeRedis.dll
+C:\Users\Nulle\Documents\hoistappnz\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\Nulle\Documents\hoistappnz\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\Nulle\Documents\hoistappnz\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+C:\Users\Nulle\Documents\hoistappnz\bin\Debug\net8.0\Pipelines.Sockets.Unofficial.dll
+C:\Users\Nulle\Documents\hoistappnz\bin\Debug\net8.0\StackExchange.Redis.dll

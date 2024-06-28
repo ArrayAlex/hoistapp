@@ -1,10 +1,7 @@
-﻿
-using Microsoft.EntityFrameworkCore;
-
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 using hoistmt.Data;
-
 using hoistmt.Services;
-
 using hoistmt.Functions;
 using hoistmt.HttpClients;
 
@@ -13,6 +10,7 @@ namespace hoistmt;
 public class Startup
 {
     public IConfiguration Configuration { get; }
+
     public Startup(IConfiguration configuration)
     {
         Configuration = configuration;
@@ -32,22 +30,28 @@ public class Startup
                 });
         });
 
+        // Configure Redis cache for session state
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = Configuration.GetConnectionString("RedisConnection");
+            options.InstanceName = "HoistSession_";
+        });
+
+        // Configure session to use Redis
         services.AddSession(options =>
         {
             options.Cookie.Name = "HoistSession";
-
-            // Determine the domain based on the environment
-            string cookieDomain = Configuration["COOKIE_DOMAIN"] ?? "localhost";
-            options.Cookie.Domain = cookieDomain;
-
-            options.IdleTimeout = TimeSpan.FromMinutes(120); // Set the session timeout duration
-
-            // Configure other session options as needed
+            options.IdleTimeout = TimeSpan.FromMinutes(120);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+            options.Cookie.Domain = Configuration["COOKIE_DOMAIN"] ?? "localhost";
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         });
 
         services.AddControllersWithViews();
         services.AddHttpContextAccessor();
         services.AddHttpClient<RegoSearch>();
+
         // Add your database context
         services.AddDbContext<MasterDbContext>(options =>
             options.UseMySql(
@@ -75,7 +79,7 @@ public class Startup
         services.AddTransient<DatabaseInitializer>();
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env,DatabaseInitializer dbInitializer)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseInitializer dbInitializer)
     {
         if (env.IsDevelopment())
         {
@@ -86,10 +90,10 @@ public class Startup
             app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
         }
+
         app.UseStaticFiles();
         app.UseRouting();
         app.UseCors("_HoistNZ");
-
 
         app.Use(async (context, next) =>
         {
@@ -109,20 +113,9 @@ public class Startup
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
-        app.UseSession();
+        app.UseSession(); // Ensure this is before UseRouting
         app.UseRouting();
-        /*var ignoredEndpoints = new List<string>
-        {
-            "/api/auth/login", // Add endpoints to ignore here
-            "/api/tenant/register", // Add endpoints to ignore here
-            // Add more endpoints as needed
-        };
 
-
-
-        app.UseMiddleware<SessionAuthenticationMiddleware>(ignoredEndpoints);*/
-
-        //app.UseMiddleware(typeof(RequestLoggingMiddleware));
         app.UseAuthorization();
 
         app.UseEndpoints(endpoints =>
