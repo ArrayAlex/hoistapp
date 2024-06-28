@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("hoistmt")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9993ed6981237000f57c01a484367bb65727bbdf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+863ac3a8a6e1b984c746744fe201de629d3ac7fd")]
 [assembly: System.Reflection.AssemblyProductAttribute("hoistmt")]
 [assembly: System.Reflection.AssemblyTitleAttribute("hoistmt")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

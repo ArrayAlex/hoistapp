@@ -4,7 +4,10 @@ using hoistmt.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
-using System.Threading.Tasks; 
+using System.Threading.Tasks;
+using hoistmt.Functions;
+using hoistmt.Models.Account;
+using hoistmt.Models.MasterDbModels;
 
 namespace hoistmt.Controllers
 {
@@ -14,16 +17,18 @@ namespace hoistmt.Controllers
     {
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
         private readonly MasterDbContext _context;
+        private Credits _credits;
 
-        public AccountController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, MasterDbContext context)
+        public AccountController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, MasterDbContext context, Credits credits)
         {
             _tenantDbContextResolver = tenantDbContextResolver;
             _context = context;
+            _credits = credits;
         }
         
         
         [HttpGet("Accounts")]
-        public async Task<ActionResult<IEnumerable<Account>>> GetAccounts([FromQuery] string token)
+        public async Task<ActionResult<IEnumerable<UserAccount>>> GetAccounts([FromQuery] string token)
         {
             // Use TenantDbContextResolver to get the tenant-specific DbContext
             var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
@@ -38,7 +43,7 @@ namespace hoistmt.Controllers
         }
 
         [HttpGet("Account")]
-        public async Task<ActionResult<Account>> GetAccountById()
+        public async Task<ActionResult<UserAccount>> GetAccountById()
         {
             // Use TenantDbContextResolver to get the tenant-specific DbContext
             var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
@@ -73,6 +78,12 @@ namespace hoistmt.Controllers
 
             // Return the response with both account and CompanyDb
             return Ok(response);
+        }
+
+        [HttpGet("AvailableCredits")]
+        public async Task<CreditsDto> GetCredits()
+        {
+            return await _credits.GetCredits(HttpContext.Session.GetString("CompanyDb"));
         }
     }
 

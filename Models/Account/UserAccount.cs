@@ -1,6 +1,6 @@
 ﻿namespace hoistmt.Models;
 
-public class Account
+public class UserAccount
 {
     //ID, Name, Password, contact, email, Active, Username
     public int Id { get; set; }

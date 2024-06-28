@@ -2,6 +2,7 @@
 using hoistmt.Models.MasterDbModels;
 using System.Linq;
 using System.Threading.Tasks;
+using hoistmt.Models.Account;
 using Microsoft.EntityFrameworkCore;
 
 namespace hoistmt.Functions
@@ -36,6 +37,17 @@ namespace hoistmt.Functions
             company.Credits -= amount;
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<CreditsDto> GetCredits(string companyID)
+        {
+            var account = await _context.Companies.FirstOrDefaultAsync(c => c.CompanyID == companyID);
+            if (account == null)
+            {
+                return null;
+            }
+
+            return new CreditsDto { Credits = account.Credits };
         }
     }
 }

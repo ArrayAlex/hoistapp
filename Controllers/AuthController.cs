@@ -44,7 +44,7 @@ namespace hoistmt.Controllers
             } 
 
             
-            var account = await dbContext.Set<Account>()
+            var account = await dbContext.Set<UserAccount>()
                 .FirstOrDefaultAsync(a => a.Username == model.Username && a.Password == model.Password);
 
            
