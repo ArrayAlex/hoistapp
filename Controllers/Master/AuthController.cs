@@ -31,7 +31,7 @@ namespace hoistmt.Controllers
         {
             if (string.IsNullOrEmpty(model.Company) || string.IsNullOrEmpty(model.Password) ||
                 string.IsNullOrEmpty(model.Username))
-            {
+            {   
                 return BadRequest("All fields are required");
             }
 
@@ -55,7 +55,6 @@ namespace hoistmt.Controllers
             HttpContext.Session.SetString("sessionid", HttpContext.Session.Id);
             HttpContext.Session.SetString("CompanyDb", model.Company);
 
-            // Fetch the company's plan details
             var company = await _context.Companies.FirstOrDefaultAsync(c => c.CompanyID == model.Company);
             if (company == null)
             {
@@ -68,10 +67,8 @@ namespace hoistmt.Controllers
                 return Unauthorized("Plan not found");
             }
 
-            // Set plan details in session
             HttpContext.Session.SetInt32("PlanID", plan.id);
             HttpContext.Session.SetString("PlanName", plan.PlanName);
-            //StorageLimitGB
             HttpContext.Session.SetInt32("StorageLimitGB", plan.StorageLimitGB);
             HttpContext.Session.SetInt32("MaxUsers", plan.MaxUsers);
             HttpContext.Session.SetString("AccessFeatureA", plan.AccessFeatureA.ToString());
@@ -80,7 +77,6 @@ namespace hoistmt.Controllers
             HttpContext.Session.SetString("AccessFeatureD", plan.AccessFeatureD.ToString());
             HttpContext.Session.SetString("AccessFeatureE", plan.AccessFeatureE.ToString());
 
-            // Create session entry
             var session = new Session
             {
                 userID = account.Id,
@@ -93,13 +89,12 @@ namespace hoistmt.Controllers
 
             _context.sessions.Add(session);
             await _context.SaveChangesAsync();
-            Console.WriteLine("LOGGING SUCESSFUL");
+            Console.WriteLine("LOGIN SUCESSFUL");
             Console.WriteLine(HttpContext.Session.Id);
             Console.Write("PlaneName: ");
             Console.WriteLine(HttpContext.Session.GetString("PlanName"));
             Console.Write("MaxUsers: ");
             Console.WriteLine(HttpContext.Session.GetInt32("MaxUsers"));
-            
 
             return Ok(new
             {
