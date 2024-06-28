@@ -1,12 +1,8 @@
-using hoistmt.Data;
+
 using hoistmt.Models;
 using hoistmt.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
 
 namespace hoistmt.Controllers
 {
@@ -46,12 +42,10 @@ namespace hoistmt.Controllers
 
                     return Ok(new List<Customer> { customer });
                 }
-                else
-                {
-                    // Retrieve all customers
-                    var customers = await dbContext.customers.ToListAsync();
-                    return Ok(customers);
-                }
+
+                // Retrieve all customers
+                var customers = await dbContext.customers.ToListAsync();
+                return Ok(customers);
             }
             catch (Exception ex)
             {

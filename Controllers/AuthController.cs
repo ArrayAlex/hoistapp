@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using hoistmt.Data;
 using hoistmt.Models;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Threading.Tasks;
+
 using Microsoft.EntityFrameworkCore;
 using hoistmt.Services;
 
@@ -92,19 +90,17 @@ namespace hoistmt.Controllers
         [HttpGet("verify")]
         public async Task<ActionResult<bool>> VerifyToken()
         {
-            
+
             // Call the VerifyToken method of TokenHandler service
             //var isValidToken = await _tokenHandler.VerifyToken(token);
             if(HttpContext.Session.GetString("CompanyDb") == null)
             {
                 return Unauthorized();
             }
-            else
-            {
-                return Ok(true);
-            }
-            
-           
+
+            return Ok(true);
+
+
         }
 
 

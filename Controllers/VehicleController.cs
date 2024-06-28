@@ -1,11 +1,9 @@
-﻿using hoistmt.Data;
+﻿
 using hoistmt.Models;
 using hoistmt.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks; // Add this namespace for Task
+
 
 namespace hoistmt.Controllers
 {
@@ -64,10 +62,8 @@ namespace hoistmt.Controllers
                 {
                     return Ok(vehicle);
                 }
-                else
-                {
-                    return NotFound(); // Vehicle with the specified ID not found
-                }
+
+                return NotFound(); // Vehicle with the specified ID not found
             }
             catch (Exception ex)
             {
@@ -92,10 +88,8 @@ namespace hoistmt.Controllers
                 {
                     return Ok(vehicles);
                 }
-                else
-                {
-                    return NotFound(); // No vehicles found for the specified customer ID
-                }
+
+                return NotFound(); // No vehicles found for the specified customer ID
             }
             catch (Exception ex)
             {

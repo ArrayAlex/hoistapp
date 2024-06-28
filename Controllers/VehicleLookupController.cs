@@ -1,11 +1,10 @@
-﻿using hoistmt.Data;
+﻿
 using hoistmt.Models.httpModels;
 using hoistmt.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using hoistmt.Functions;
+
 using hoistmt.HttpClients;
-using Microsoft.AspNetCore.Http;
+
 
 namespace hoistmt.Controllers
 {

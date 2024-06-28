@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using System.Text.Json.Serialization;
 
 namespace hoistmt.Models.httpModels

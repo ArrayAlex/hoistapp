@@ -34,16 +34,6 @@ namespace hoistmt.Controllers
                 {
                     return BadRequest("DatabaseName is required. ");
                 }
-                var existingTenant = await _context.Tenants.FirstOrDefaultAsync(t => t.DatabaseName == newUser.DatabaseName);
-                
-                if (existingTenant != null)
-                {
-                    // DatabaseName is already taken, return appropriate response
-                    return Conflict("DatabaseName is already taken. ");
-                }
-                var createdTenant = await _tenantService.CreateTenant(newUser);
-                // CreatedAtAction(nameof(GetTenant), new { id = createdTenant.Id }, createdTenant);
-                return Ok();
             }
             catch (NotFoundException ex)
             {

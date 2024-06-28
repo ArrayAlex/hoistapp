@@ -1,10 +1,9 @@
 ﻿using hoistmt.Models.httpModels;
 
-namespace hoistmt.HttpClients
+namespace hoistmt.HttpClients;
+
+public class Result
 {
-    public class Result
-    {
-        public RegoData Data { get; set; }
-        public string Error { get; set; }
-    }
+    public RegoData Data { get; set; }
+    public string Error { get; set; }
 }

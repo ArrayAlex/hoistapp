@@ -1,45 +1,42 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+
 using hoistmt.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace hoistmt.Services
+namespace hoistmt.Services;
+
+public class DatabaseInitializer
 {
-    public class DatabaseInitializer
+    private readonly MasterDbContext _masterDbContext;
+    private readonly TenantDbContext _tenantDbContext;
+    private readonly ILogger<DatabaseInitializer> _logger;
+
+    public DatabaseInitializer(
+        MasterDbContext masterDbContext,
+        TenantDbContext tenantDbContext,    
+        ILogger<DatabaseInitializer> logger)
     {
-        private readonly MasterDbContext _masterDbContext;
-        private readonly TenantDbContext _tenantDbContext;
-        private readonly ILogger<DatabaseInitializer> _logger;
+        _masterDbContext = masterDbContext;
+        _tenantDbContext = tenantDbContext;
+        _logger = logger;
+    }
 
-        public DatabaseInitializer(
-            MasterDbContext masterDbContext,
-            TenantDbContext tenantDbContext,    
-            ILogger<DatabaseInitializer> logger)
+    public async Task InitializeAsync()
+    {
+        await InitializeConnectionAsync(_masterDbContext, "MasterDbContext");
+        await InitializeConnectionAsync(_tenantDbContext, "TenantDbContext");
+    }
+
+    private async Task InitializeConnectionAsync(DbContext context, string contextName)
+    {
+        try
         {
-            _masterDbContext = masterDbContext;
-            _tenantDbContext = tenantDbContext;
-            _logger = logger;
+            // Perform a simple query to warm up the connection
+            await context.Database.ExecuteSqlRawAsync("SELECT 1");
+            Console.WriteLine($"{contextName} connection initialized.");
         }
-
-        public async Task InitializeAsync()
+        catch (Exception ex)
         {
-            await InitializeConnectionAsync(_masterDbContext, "MasterDbContext");
-            await InitializeConnectionAsync(_tenantDbContext, "TenantDbContext");
-        }
-
-        private async Task InitializeConnectionAsync(DbContext context, string contextName)
-        {
-            try
-            {
-                // Perform a simple query to warm up the connection
-                await context.Database.ExecuteSqlRawAsync("SELECT 1");
-                Console.WriteLine($"{contextName} connection initialized.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error initializing {contextName} connection: {ex.Message}");
-            }
+            Console.WriteLine($"Error initializing {contextName} connection: {ex.Message}");
         }
     }
 }

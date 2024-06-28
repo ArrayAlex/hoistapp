@@ -1,12 +1,9 @@
-using hoistmt.Data;
+
 using hoistmt.Models;
 using hoistmt.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
+
 
 namespace hoistmt.Controllers
 {
@@ -49,15 +46,13 @@ namespace hoistmt.Controllers
 
                     return Ok(invoices);
                 }
-                else
-                {
-                    // Retrieve all Invoices along with their related entries
-                    var Invoices = await dbContext.invoices.ToListAsync();
-                        //.Include(i => i.Entries) // Include related entries
+
+                // Retrieve all Invoices along with their related entries
+                var Invoices = await dbContext.invoices.ToListAsync();
+                //.Include(i => i.Entries) // Include related entries
                         
 
-                    return Ok(Invoices);
-                }
+                return Ok(Invoices);
             }
             catch (Exception ex)
             {
