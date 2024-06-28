@@ -2,9 +2,10 @@
 using hoistmt.Models;
 using hoistmt.Services;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 using hoistmt.Functions;
-
 using hoistmt.Models.Account;
 
 namespace hoistmt.Controllers
@@ -46,6 +47,18 @@ namespace hoistmt.Controllers
             if (!await _accountSubscription.HasFreeUserSlot(HttpContext.Session.GetString("CompanyDb")))
             {
                 return BadRequest("No free user slots available.");
+            }
+
+            // Check if there is already an account with the same email
+            var existingemail = await dbContext.accounts.FirstOrDefaultAsync(a => a.email == model.email);
+            if (existingemail != null)
+            {
+                return BadRequest("An account with this email already exists.");
+            }
+            var existingUsername = await dbContext.accounts.FirstOrDefaultAsync(a => a.Username == model.Username);
+            if (existingUsername != null)
+            {
+                return BadRequest("An account with this username already exists.");
             }
 
             // Create a new UserAccount object
