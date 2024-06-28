@@ -61,7 +61,7 @@ namespace hoistmt.Controllers
                 return BadRequest("An account with this username already exists.");
             }
 
-            // Create a new UserAccount object
+            // Create a new UserAccount objectjkk
             var newUserAccount = new UserAccount
             {
                 Name = model.Name,
