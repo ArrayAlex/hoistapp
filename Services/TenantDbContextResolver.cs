@@ -73,8 +73,8 @@ namespace hoistmt.Services
         // }
     }
 
-    public interface ITenantDbContextResolver<TContext> where TContext : DbContext
-{
+    public interface ITenantDbContextResolver<TContext>
+    {
     Task<TContext> GetTenantDbContextAsync();
     Task<TContext> GetTenantLoginDbContextAsync(string companyid); // Add the parameter
 }
