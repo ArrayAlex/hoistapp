@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using hoistmt.Functions;
 using hoistmt.Models.Account;
+using hoistmt.Models.Account.Management;
 
 namespace hoistmt.Controllers
 {
@@ -81,6 +82,37 @@ namespace hoistmt.Controllers
             await dbContext.SaveChangesAsync();
 
             return Ok(newUserAccount);
+        }
+        
+        [HttpGet("Accounts")]
+        public async Task<ActionResult<IEnumerable<UserAccountDTO>>> GetAccounts()
+        {
+            // Use TenantDbContextResolver to get the tenant-specific DbContext
+            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
+            if (dbContext == null)
+            {
+                return NotFound("Tenant DbContext not available for the retrieved database.");
+            }
+
+            // Fetch all accounts from the accounts table
+            var accounts = await dbContext.accounts.ToListAsync();
+
+            // Map UserAccount to UserAccountDTO
+            var accountDTOs = accounts.Select(account => new UserAccountDTO
+            {
+                Id = account.Id,
+                Name = account.Name,
+                Contact = account.contact,
+                Email = account.email,
+                Active = account.Active,
+                Username = account.Username,
+                RoleName = account.roleName,
+                Position = account.position,
+                Phone = account.phone,
+                RoleID = account.roleID
+            }).ToList();
+
+            return Ok(accountDTOs);
         }
 
         [HttpGet("AvailableCredits")]
