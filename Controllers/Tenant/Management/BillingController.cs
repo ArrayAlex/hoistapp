@@ -44,7 +44,7 @@ namespace hoistmt.Controllers
             }
 
             // Fetch the invoice from the master database
-            var invoice = await _context.invoices.FirstOrDefaultAsync(i => i.InvoiceID == request.InvoiceID);
+            var invoice = await tenantDbContext.companyinvoices.FirstOrDefaultAsync(i => i.InvoiceID == request.InvoiceID);
             if (invoice == null)
             {
                 return NotFound("Invoice not found.");
@@ -72,7 +72,7 @@ namespace hoistmt.Controllers
             {
                 // Charge the card
                 var charge = await _stripeService.CreatePaymentIntentAsync(paymentMethod.CustomerId, invoice.Amount, paymentMethod.MethodId);
-                return Ok(new { Message = "Bill paid successfully", ChargeId = charge.Id });
+                return Ok(new { Message = "Bill paid successfully" });
             }
             catch (StripeException e)
             {

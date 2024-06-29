@@ -2,7 +2,7 @@
 
 namespace hoistmt.Models.MasterDbModels;
 
-public class MasterInvoice
+public class CompanInvoice
 {
     [Key]
     public int InvoiceID { get; set; }

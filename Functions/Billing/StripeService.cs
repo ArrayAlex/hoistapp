@@ -55,7 +55,7 @@ namespace hoistmt.Functions
             var options = new PaymentIntentCreateOptions
             {
                 Amount = (long)(amount * 100), // Convert amount to cents
-                Currency = "usd",
+                Currency = "nzd",
                 Customer = customerId,
                 PaymentMethod = paymentMethodId,
                 Confirm = true, // Automatically confirm the payment
@@ -70,7 +70,7 @@ namespace hoistmt.Functions
             catch (StripeException ex)
             {
                 // Handle Stripe exceptions appropriately
-                throw new ApplicationException($"Stripe API error: {ex.Message}", ex);
+                throw new ApplicationException($" API error: {ex.Message}", ex);
             }
         }
     }
