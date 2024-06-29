@@ -14,10 +14,10 @@ public class TenantService
         _context = context;
     }
 
-    public async Task<Tenant> CreateTenant(newUser newUser)
+    public async Task<DbTenant> CreateTenant(newUser newUser)
     {
 
-        Tenant tenant = new Tenant {
+        DbTenant dbTenant = new DbTenant {
             Name = newUser.Name,
             Username = newUser.Username,
             Password = newUser.Password,
@@ -26,14 +26,14 @@ public class TenantService
 
             
             
-        var existingTenant = await _context.Tenants.FirstOrDefaultAsync(t => t.DatabaseName == tenant.DatabaseName);
+        var existingTenant = await _context.Tenants.FirstOrDefaultAsync(t => t.DatabaseName == dbTenant.DatabaseName);
         if (existingTenant != null)
         {
             // DatabaseName is already taken, return appropriate response
             Console.WriteLine("DatabaseName is already taken.");
         }
         // Add the new tenant to the Tenants table
-        _context.Tenants.Add(tenant);
+        _context.Tenants.Add(dbTenant);
         await _context.SaveChangesAsync();
 
         // Retrieve tables from the template schema (client_bbt_0001)
@@ -46,7 +46,7 @@ public class TenantService
         }
 
         // Create a new schema with the name specified in DatabaseName property
-        var newSchemaName = tenant.DatabaseName;
+        var newSchemaName = dbTenant.DatabaseName;
         var createSchemaSql = $"CREATE SCHEMA `{newSchemaName}`";
         await _context.Database.ExecuteSqlRawAsync(createSchemaSql);
         var templateSchemaName = "templateSchema";
@@ -72,7 +72,7 @@ public class TenantService
         // Insert tenant data into the accounts table for the new schema
         await InsertTenantIntoAccounts(user, newSchemaName);
 
-        return tenant;
+        return dbTenant;
     }
 
     private async Task InsertTenantIntoAccounts(User user, string schemaName)

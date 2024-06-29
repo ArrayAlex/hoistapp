@@ -18,7 +18,7 @@ public class JwtService
         _issuer = issuer;
     }
 
-    public string GenerateJwtToken(Tenant tenant)
+    public string GenerateJwtToken(DbTenant dbTenant)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_secretKey);
@@ -27,7 +27,7 @@ public class JwtService
         {
             Subject = new ClaimsIdentity(new Claim[]
             {
-                new Claim(ClaimTypes.NameIdentifier, tenant.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, dbTenant.Id.ToString()),
                 // Add any other claims you want to include in the token
             }),
             Expires = DateTime.UtcNow.AddHours(1), // Token expires in 1 hour

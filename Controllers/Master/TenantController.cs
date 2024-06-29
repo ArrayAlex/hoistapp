@@ -23,7 +23,7 @@ namespace hoistmt.Controllers
         
         [HttpPost("register")]
         // /api/Tenant/register
-        public async Task<ActionResult<Tenant>> CreateTenant(newUser newUser)
+        public async Task<ActionResult<DbTenant>> CreateTenant(newUser newUser)
         {
             try
             {
@@ -47,7 +47,7 @@ namespace hoistmt.Controllers
         }
         
         [HttpGet("{id}")] 
-        public async Task<ActionResult<Tenant>> GetTenant(int id)
+        public async Task<ActionResult<DbTenant>> GetTenant(int id)
         {
             var tenant = await _context.Tenants.FindAsync(id);
         

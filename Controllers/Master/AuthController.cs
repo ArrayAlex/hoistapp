@@ -103,6 +103,7 @@ namespace hoistmt.Controllers
                 {
                     PlanID = plan.id,
                     PlanName = plan.PlanName,
+                    Cost = plan.MonthlyCost,
                     StorageLimitGB = plan.StorageLimitGB,
                     MaxUsers = plan.MaxUsers,
                     AccessFeatureA = plan.AccessFeatureA,

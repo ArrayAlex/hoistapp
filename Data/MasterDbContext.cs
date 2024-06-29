@@ -13,7 +13,7 @@ public class MasterDbContext : DbContext
 {
     public MasterDbContext(DbContextOptions<MasterDbContext> options) : base(options) { }
 
-    public DbSet<Tenant> Tenants { get; set; }
+    public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<Session> sessions { get; set; }
     public DbSet<VehicleData> vehicledata { get; set; }
     public DbSet<TenantTransactions> tenanttransactions { get; set; }
