@@ -52,24 +52,15 @@ public class Startup
         services.AddHttpContextAccessor();
         services.AddHttpClient<RegoSearch>();
 
-        // Choose the correct connection string based on the presence of COOKIE_DOMAIN
-        string masterConnection = string.IsNullOrEmpty(Configuration["COOKIE_DOMAIN"])
-            ? Configuration.GetConnectionString("masterConnectionLocal")
-            : Configuration.GetConnectionString("masterConnectionRemote");
-
-        string tenantConnection = string.IsNullOrEmpty(Configuration["COOKIE_DOMAIN"])
-            ? Configuration.GetConnectionString("tenantConnectionLocal")
-            : Configuration.GetConnectionString("tenantConnectionRemote");
-
         // Add your database context
         services.AddDbContext<MasterDbContext>(options =>
             options.UseMySql(
-                masterConnection,
+                Configuration.GetConnectionString("MasterConnectionRemote"),
                 new MySqlServerVersion(new Version(8, 0, 23))));
 
         services.AddDbContextFactory<TenantDbContext>(options =>
             options.UseMySql(
-                tenantConnection,
+                Configuration.GetConnectionString("tenantConnectionRemote"),
                 new MySqlServerVersion(new Version(8, 0, 23))));
 
         // Register TenantDbContextResolver as a scoped service
@@ -77,7 +68,7 @@ public class Startup
         services.AddScoped<TenantService>();
         services.AddScoped<TokenHandler>();
         services.AddScoped<Credits>();
-        services.AddScoped<AccountSubscription>();
+        services.AddScoped<AccountSubscription >();
         services.AddSingleton<StripeService>();
         services.AddSingleton<JwtService>(provider =>
         {
