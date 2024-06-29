@@ -165,12 +165,48 @@ namespace hoistmt.Controllers
                     pg.Card,
                     pg.Brand,
                     pg.Last4,
-                    pg.Id
+                    pg.Id,
+                    pg.Default
                 })
                 .ToListAsync();
 
             return Ok(paymentMethods);
         }
+        
+        [HttpPost("set-default-payment-method")]
+        public async Task<IActionResult> SetDefaultPaymentMethod([FromBody] SetDefaultPaymentMethodRequest request)
+        {
+            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
+            if (dbContext == null)
+            {
+                return NotFound("Tenant DbContext not available for the retrieved database.");
+            }
+
+            // Reset the default flag for all payment methods
+            var paymentMethods = await dbContext.paymentgateway.ToListAsync();
+            foreach (var method in paymentMethods)
+            {
+                method.Default = false;
+            }
+
+            // Set the selected payment method as default
+            var paymentMethod = await dbContext.paymentgateway.FirstOrDefaultAsync(pm => pm.MethodId == request.MethodId);
+            if (paymentMethod == null)
+            {
+                return NotFound("Payment method not found.");
+            }
+
+            paymentMethod.Default = true;
+            await dbContext.SaveChangesAsync();
+
+            return Ok(new { Message = "Default payment method updated successfully" });
+        }
+        
+    }
+    
+    public class SetDefaultPaymentMethodRequest
+    {
+        public string MethodId { get; set; }
     }
 
     public class CreateCustomerRequest
