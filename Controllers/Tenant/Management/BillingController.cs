@@ -79,7 +79,7 @@ namespace hoistmt.Controllers
                 return BadRequest(new { error = e.Message });
             }
         }
-        
+
         [HttpPost("create-subscription")]
         public async Task<IActionResult> CreateSubscription([FromBody] CreateSubscriptionRequest request)
         {
@@ -90,6 +90,20 @@ namespace hoistmt.Controllers
             }
             var subscription = await _stripeService.CreateSubscriptionAsync(request.CustomerId, request.PriceId);
             return Ok(subscription);
+        }
+        
+        [HttpPost("deletePaymentMethod")]
+        public async Task<IActionResult> DeletePaymentMethod([FromBody] DeletePaymentMethodRequest request)
+        {
+            try
+            {
+                await _stripeService.DeletePaymentMethodAsync(request.PaymentGatewayId);
+                return Ok(new { Message = "Payment method deleted successfully" });
+            }
+            catch (ApplicationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         [HttpPost("add-payment-method")]
@@ -150,7 +164,8 @@ namespace hoistmt.Controllers
                     pg.MethodId,
                     pg.Card,
                     pg.Brand,
-                    pg.Last4
+                    pg.Last4,
+                    pg.Id
                 })
                 .ToListAsync();
 
@@ -174,5 +189,10 @@ namespace hoistmt.Controllers
     {
         public string Email { get; set; }
         public string PaymentMethodId { get; set; }
+    }
+
+    public class DeletePaymentMethodRequest
+    {
+        public int PaymentGatewayId { get; set; }
     }
 }

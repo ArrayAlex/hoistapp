@@ -69,7 +69,7 @@ public class Startup
         services.AddScoped<TokenHandler>();
         services.AddScoped<Credits>();
         services.AddScoped<AccountSubscription >();
-        services.AddSingleton<StripeService>();
+        services.AddScoped<StripeService>();
         services.AddSingleton<JwtService>(provider =>
         {
             var secretKey = Configuration["JWT_SECRET_KEY"] ?? "wabZ$Aa)]b7tF[[YvhqS*:dkzz9w";
