@@ -20,7 +20,7 @@ namespace hoistmt.Controllers
             _tenantDbContextResolver = tenantDbContextResolver;
 
         }
-
+        //test
 
         [HttpGet("Appointments")]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointments([FromQuery] string startDate,
