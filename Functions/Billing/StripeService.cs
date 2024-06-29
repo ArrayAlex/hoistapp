@@ -49,5 +49,29 @@ namespace hoistmt.Functions
             var service = new PaymentMethodService();
             return await service.GetAsync(paymentMethodId);
         }
+        
+        public async Task<PaymentIntent> CreatePaymentIntentAsync(string customerId, decimal amount, string paymentMethodId)
+        {
+            var options = new PaymentIntentCreateOptions
+            {
+                Amount = (long)(amount * 100), // Convert amount to cents
+                Currency = "usd",
+                Customer = customerId,
+                PaymentMethod = paymentMethodId,
+                Confirm = true, // Automatically confirm the payment
+                OffSession = true, // Specify if the payment is off-session if needed
+            };
+
+            var service = new PaymentIntentService();
+            try
+            {
+                return await service.CreateAsync(options);
+            }
+            catch (StripeException ex)
+            {
+                // Handle Stripe exceptions appropriately
+                throw new ApplicationException($"Stripe API error: {ex.Message}", ex);
+            }
+        }
     }
 }

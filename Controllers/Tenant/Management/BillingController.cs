@@ -5,6 +5,8 @@ using Stripe;
 using System.Threading.Tasks;
 using hoistmt.Services;
 using System.Linq;
+using hoistmt.Data;
+using hoistmt.Models.MasterDbModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace hoistmt.Controllers
@@ -13,13 +15,15 @@ namespace hoistmt.Controllers
     [Route("api/[controller]")]
     public class BillingController : ControllerBase
     {
+        private readonly MasterDbContext _context;
         private readonly StripeService _stripeService;
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
 
-        public BillingController(StripeService stripeService, ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver)
+        public BillingController(StripeService stripeService, ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, MasterDbContext context)
         {
             _stripeService = stripeService;
             _tenantDbContextResolver = tenantDbContextResolver;
+            _context = context;
         }
 
         [HttpPost("create-customer")]
@@ -28,10 +32,62 @@ namespace hoistmt.Controllers
             var customer = await _stripeService.CreateCustomerAsync(request.Email, request.PaymentMethodId);
             return Ok(customer);
         }
+        
+        [HttpPost("payBill")]
+        public async Task<IActionResult> PayBill([FromBody] PayBillRequest request)
+        {
+            // Retrieve tenant-specific database context
+            var tenantDbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
+            if (tenantDbContext == null)
+            {
+                return NotFound("Tenant DbContext not available.");
+            }
 
+            // Fetch the invoice from the master database
+            var invoice = await _context.invoices.FirstOrDefaultAsync(i => i.InvoiceID == request.InvoiceID);
+            if (invoice == null)
+            {
+                return NotFound("Invoice not found.");
+            }
+
+            // Determine the payment method to use
+            PaymentGateway paymentMethod;
+            if (string.IsNullOrEmpty(request.MethodID))
+            {
+                // Use the default payment method
+                paymentMethod = await tenantDbContext.paymentgateway.FirstOrDefaultAsync(pm => pm.Active && pm.Default);
+            }
+            else
+            {
+                // Use the specified payment method
+                paymentMethod = await tenantDbContext.paymentgateway.FirstOrDefaultAsync(pm => pm.MethodId == request.MethodID && pm.Active);
+            }
+
+            if (paymentMethod == null)
+            {
+                return NotFound("Payment method not available.");
+            }
+
+            try
+            {
+                // Charge the card
+                var charge = await _stripeService.CreatePaymentIntentAsync(paymentMethod.CustomerId, invoice.Amount, paymentMethod.MethodId);
+                return Ok(new { Message = "Bill paid successfully", ChargeId = charge.Id });
+            }
+            catch (StripeException e)
+            {
+                return BadRequest(new { error = e.Message });
+            }
+        }
+        
         [HttpPost("create-subscription")]
         public async Task<IActionResult> CreateSubscription([FromBody] CreateSubscriptionRequest request)
         {
+            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
+            if (dbContext == null)
+            {
+                return NotFound("Tenant DbContext not available for the retrieved database.");
+            }
             var subscription = await _stripeService.CreateSubscriptionAsync(request.CustomerId, request.PriceId);
             return Ok(subscription);
         }

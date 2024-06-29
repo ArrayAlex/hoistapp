@@ -9,5 +9,7 @@
         public string CustomerId { get; set; } // Stripe Customer ID
         public string Brand { get; set; } // Card Brand
         public string Last4 { get; set; } // Last 4 digits of the card
+        
+        public bool Default { get; set; } 
     }
 }

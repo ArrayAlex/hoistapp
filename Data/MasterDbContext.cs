@@ -15,6 +15,7 @@ public class MasterDbContext : DbContext
 
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<Session> sessions { get; set; }
+    public DbSet<MasterInvoice> invoices { get; set; }
     public DbSet<VehicleData> vehicledata { get; set; }
     public DbSet<TenantTransactions> tenanttransactions { get; set; }
     public DbSet<Subscription> plansubscriptions { get; set; }
