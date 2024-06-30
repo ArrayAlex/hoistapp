@@ -14,6 +14,7 @@ public class MasterDbContext : DbContext
     public MasterDbContext(DbContextOptions<MasterDbContext> options) : base(options) { }
 
     public DbSet<DbTenant> tenants { get; set; }
+    public DbSet<Logs> logs { get; set; }
     public DbSet<Session> sessions { get; set; }
     public DbSet<CompanInvoice> companyinvoices { get; set; }
     public DbSet<VehicleData> vehicledata { get; set; }
