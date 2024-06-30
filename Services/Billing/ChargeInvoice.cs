@@ -58,7 +58,7 @@ namespace hoistmt.Services.Billing
             for (int i = 1; i <= 3; i++)
             {
                 var instanceKey = $"{_instanceKeyPrefix}{i}";
-                if (await db.StringSetAsync(instanceKey, i.ToString(), TimeSpan.FromMinutes(5), When.NotExists))
+                if (await db.StringSetAsync(instanceKey, i.ToString(), TimeSpan.FromMinutes(1), When.NotExists))
                 {
                     _logger.LogInformation($"Acquired instance ID {i}");
                     return i.ToString();
