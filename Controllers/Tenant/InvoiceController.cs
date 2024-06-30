@@ -57,7 +57,7 @@ namespace hoistmt.Controllers
             catch (Exception ex)
             {
                 // Log the exception
-                Console.WriteLine($"Error fetching Invoices: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"Error fetching Invoices: {ex.Message}");
                 return StatusCode(500, "Internal Server Error");
             }
         }
@@ -94,7 +94,7 @@ namespace hoistmt.Controllers
             catch (Exception ex)
             {
                 // Log the exception
-                Console.WriteLine($"Error fetching Customer by Vehicle ID: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"Error fetching Customer by Vehicle ID: {ex.Message}");
                 return StatusCode(500, "Internal Server Error");
             }
         }

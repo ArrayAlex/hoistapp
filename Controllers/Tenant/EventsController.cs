@@ -54,7 +54,7 @@ namespace hoistmt.Controllers
             catch (Exception ex)
             {
                 // Log the exception
-                Console.WriteLine($"Error fetching events: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"Error fetching events: {ex.Message}");
                 return StatusCode(500, "Internal Server Error");
             }
         }

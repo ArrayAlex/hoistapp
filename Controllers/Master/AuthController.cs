@@ -38,7 +38,7 @@ namespace hoistmt.Controllers
             var dbContext = await _tenantDbContextResolver.GetTenantLoginDbContextAsync(model.Company);
             if (dbContext == null)
             {
-                Console.WriteLine("Tenant database context not found");
+                System.Diagnostics.Trace.WriteLine("Tenant database context not found");
                 return Unauthorized("Tenant database context not found");
             }
 
@@ -47,7 +47,7 @@ namespace hoistmt.Controllers
 
             if (account == null)
             {
-                Console.WriteLine("Invalid username or password");
+                System.Diagnostics.Trace.WriteLine("Invalid username or password");
                 return Unauthorized("Invalid username or password");
             }
 
@@ -89,12 +89,12 @@ namespace hoistmt.Controllers
 
             _context.sessions.Add(session);
             await _context.SaveChangesAsync();
-            Console.WriteLine("LOGIN SUCESSFUL");
-            Console.WriteLine(HttpContext.Session.Id);
+            System.Diagnostics.Trace.WriteLine("LOGIN SUCESSFUL");
+            System.Diagnostics.Trace.WriteLine(HttpContext.Session.Id);
             Console.Write("PlaneName: ");
-            Console.WriteLine(HttpContext.Session.GetString("PlanName"));
+            System.Diagnostics.Trace.WriteLine(HttpContext.Session.GetString("PlanName"));
             Console.Write("MaxUsers: ");
-            Console.WriteLine(HttpContext.Session.GetInt32("MaxUsers"));
+            System.Diagnostics.Trace.WriteLine(HttpContext.Session.GetInt32("MaxUsers"));
 
             return Ok(new
             {
@@ -158,7 +158,7 @@ namespace hoistmt.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error during logout: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"Error during logout: {ex.Message}");
                 return StatusCode(500, "An error occurred during logout");
             }
         }

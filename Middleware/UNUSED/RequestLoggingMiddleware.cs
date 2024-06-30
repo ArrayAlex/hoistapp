@@ -34,10 +34,10 @@ namespace hoistmt.Middleware
           
 
             // Log request headers
-            Console.WriteLine("Request Headers:");
+            System.Diagnostics.Trace.WriteLine("Request Headers:");
             foreach (var header in request.Headers)
             {
-                Console.WriteLine($"{header.Key}: {header.Value}");
+                System.Diagnostics.Trace.WriteLine($"{header.Key}: {header.Value}");
             }
 
             // Log request body (if present)
@@ -45,7 +45,7 @@ namespace hoistmt.Middleware
             {
                 request.EnableBuffering();
                 var requestBody = new StreamReader(request.Body).ReadToEnd();
-                Console.WriteLine($"Request Body: {requestBody}");
+                System.Diagnostics.Trace.WriteLine($"Request Body: {requestBody}");
 
                 // Reset the stream position for downstream middleware
                 request.Body.Position = 0;

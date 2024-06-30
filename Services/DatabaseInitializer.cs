@@ -32,11 +32,11 @@ public class DatabaseInitializer
         {
             // Perform a simple query to warm up the connection
             await context.Database.ExecuteSqlRawAsync("SELECT 1");
-            Console.WriteLine($"{contextName} connection initialized.");
+            System.Diagnostics.Trace.WriteLine($"{contextName} connection initialized.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error initializing {contextName} connection: {ex.Message}");
+            System.Diagnostics.Trace.WriteLine($"Error initializing {contextName} connection: {ex.Message}");
         }
     }
 }

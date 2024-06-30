@@ -49,7 +49,7 @@ public class TenantDbContextResolver<TContext> : ITenantDbContextResolver<TConte
         
         var tenantSchemaName = companyid;
 
-        Console.WriteLine("Tenant Schema Name: " + tenantSchemaName);
+        System.Diagnostics.Trace.WriteLine("Tenant Schema Name: " + tenantSchemaName);
         if (tenantSchemaName == null)
         {
             return null;

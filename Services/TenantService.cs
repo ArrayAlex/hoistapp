@@ -30,7 +30,7 @@ public class TenantService
         if (existingTenant != null)
         {
             // DatabaseName is already taken, return appropriate response
-            Console.WriteLine("DatabaseName is already taken.");
+            System.Diagnostics.Trace.WriteLine("DatabaseName is already taken.");
         }
         // Add the new tenant to the Tenants table
         _context.tenants.Add(dbTenant);
