@@ -48,7 +48,7 @@ namespace hoistmt.Services.Billing
                 await ChargeInvoicesAsync(stoppingToken);
 
                 _logger.LogInformation("Waiting for 10 minutes before next run...");
-                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken); // Adjust the interval as needed
+                await Task.Delay(TimeSpan.FromMinutes(0.15), stoppingToken); // Adjust the interval as needed
             }
         }
 
