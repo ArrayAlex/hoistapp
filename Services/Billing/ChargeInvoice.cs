@@ -7,11 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using hoistmt.Data;
 using hoistmt.Functions;
-using hoistmt.Models.MasterDbModels;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
-using Stripe;
 
 namespace hoistmt.Services.Billing
 {
@@ -21,25 +20,23 @@ namespace hoistmt.Services.Billing
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<ChargeInvoiceService> _logger;
         private readonly string _lockKeyPrefix = "charge-invoice-lock-";
-        private readonly string _instanceId;
 
         public ChargeInvoiceService(IConnectionMultiplexer redis, IServiceProvider serviceProvider, ILogger<ChargeInvoiceService> logger)
         {
             _redis = redis;
             _serviceProvider = serviceProvider;
             _logger = logger;
-            _instanceId = Environment.GetEnvironmentVariable("WEBSITE_INSTANCE_ID") ?? "UnknownInstance";
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                LogWithInstanceId("Starting to charge invoices...");
+                _logger.LogInformation("Starting to charge invoices...");
                 await ChargeInvoicesAsync(stoppingToken);
 
-                LogWithInstanceId("Waiting for 10 minutes before next run...");
-                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken); // Adjust the interval as needed
+                _logger.LogInformation("Waiting for 10 minutes before next run...");
+                await Task.Delay(TimeSpan.FromMinutes(0.5), stoppingToken); // Adjust the interval as needed
             }
         }
 
@@ -56,17 +53,17 @@ namespace hoistmt.Services.Billing
             if (storedLockToken == lockToken)
             {
                 await db.KeyDeleteAsync(lockKey);
-                LogWithInstanceId($"Lock released successfully for {lockKey}.");
+                _logger.LogInformation("Lock released successfully for {lockKey}.", lockKey);
             }
             else
             {
-                LogWithInstanceId($"Lock token mismatch, lock not released for {lockKey}.");
+                _logger.LogInformation("Lock token mismatch, lock not released for {lockKey}.", lockKey);
             }
         }
 
         private async Task ChargeInvoicesAsync(CancellationToken stoppingToken)
         {
-            LogWithInstanceId("Charging invoices...");
+            _logger.LogInformation("Charging invoices...");
 
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -82,8 +79,8 @@ namespace hoistmt.Services.Billing
                     var dueInvoices = await dbContext.companyinvoices
                         .Where(i => i.Status == "Due" && (i.DueDate.Date == today || i.CreatedDate.Date == today))
                         .ToListAsync(stoppingToken);
-
-                    LogWithInstanceId($"{dueInvoices.Count} due invoices found.");
+                    
+                    _logger.LogInformation("{Count} due invoices found.", dueInvoices.Count);
 
                     foreach (var invoice in dueInvoices)
                     {
@@ -94,18 +91,18 @@ namespace hoistmt.Services.Billing
                         {
                             try
                             {
-                                LogWithInstanceId($"Processing invoice {invoice.InvoiceID} for company {invoice.CompanyID}...");
+                                _logger.LogInformation("Processing invoice {InvoiceID} for company {CompanyID}...", invoice.InvoiceID, invoice.CompanyID);
                                 var tenantDbContext = await tenantDbContextResolver.GetTenantLoginDbContextAsync(invoice.CompanyID);
                                 if (tenantDbContext == null)
                                 {
-                                    LogWithInstanceId($"Tenant DbContext not available for tenant {invoice.CompanyID}.");
+                                    _logger.LogWarning("Tenant DbContext not available for tenant {CompanyID}.", invoice.CompanyID);
                                     continue;
                                 }
 
                                 var paymentMethod = await tenantDbContext.paymentgateway.FirstOrDefaultAsync(pm => pm.Active && pm.Default, stoppingToken);
                                 if (paymentMethod == null)
                                 {
-                                    LogWithInstanceId($"Default payment method not available for tenant {invoice.CompanyID}.");
+                                    _logger.LogWarning("Default payment method not available for tenant {CompanyID}.", invoice.CompanyID);
                                     continue;
                                 }
 
@@ -114,15 +111,15 @@ namespace hoistmt.Services.Billing
                                 invoice.IsPaid = true;
                                 dbContext.Update(invoice); // Update the invoice status in the master database
                                 await dbContext.SaveChangesAsync(stoppingToken);
-                                LogWithInstanceId($"Invoice {invoice.InvoiceID} paid successfully.");
+                                _logger.LogInformation("Invoice {InvoiceID} paid successfully.", invoice.InvoiceID);
                             }
                             catch (Exception ex) when (ex is MySqlException mysqlEx && mysqlEx.Message.Contains("doesn't exist"))
                             {
-                                LogWithInstanceId($"Table 'paymentgateway' does not exist for tenant {invoice.CompanyID}. {mysqlEx.Message}");
+                                _logger.LogError(mysqlEx, "Table 'paymentgateway' does not exist for tenant {CompanyID}.", invoice.CompanyID);
                             }
                             catch (StripeException ex)
                             {
-                                LogWithInstanceId($"Payment failed for invoice {invoice.InvoiceID}. {ex.Message}");
+                                _logger.LogError(ex, "Payment failed for invoice {InvoiceID}.", invoice.InvoiceID);
                             }
                             finally
                             {
@@ -131,28 +128,23 @@ namespace hoistmt.Services.Billing
                         }
                         else
                         {
-                            LogWithInstanceId($"Could not acquire lock for invoice {invoice.InvoiceID}, another instance might be processing it.");
+                            _logger.LogInformation("Could not acquire lock for invoice {InvoiceID}, another instance might be processing it.", invoice.InvoiceID);
                         }
 
                         if (stoppingToken.IsCancellationRequested)
                         {
-                            LogWithInstanceId("Cancellation requested, stopping processing.");
+                            _logger.LogInformation("Cancellation requested, stopping processing.");
                             break;
                         }
                     }
 
-                    LogWithInstanceId("Invoices charged successfully.");
+                    _logger.LogInformation("Invoices charged successfully.");
                 }
                 catch (Exception ex)
                 {
-                    LogWithInstanceId($"Error charging invoices. {ex.Message}");
+                    _logger.LogError(ex, "Error charging invoices.");
                 }
             }
-        }
-
-        private void LogWithInstanceId(string message)
-        {
-            System.Diagnostics.Trace.WriteLine($"{_instanceId}: {message}");
         }
     }
 }
