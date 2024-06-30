@@ -17,7 +17,7 @@ namespace hoistmt.Services.Billing
         private readonly IConnectionMultiplexer _redis;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<GenerateInvoiceService> _logger;
-        private readonly string _lockKey = "generate-invoice-lock";
+        private readonly string _lockKeyPrefix = "generate-invoice-lock-";
 
         public GenerateInvoiceService(IConnectionMultiplexer redis, IServiceProvider serviceProvider, ILogger<GenerateInvoiceService> logger)
         {
@@ -30,61 +30,36 @@ namespace hoistmt.Services.Billing
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var lockToken = Guid.NewGuid().ToString();
-                if (await AcquireLockAsync(lockToken))
-                {
-                    try
-                    {
-                        _logger.LogInformation("Acquired lock, starting to generate invoices...");
-                        await GenerateInvoicesAsync();
-                    }
-                    finally
-                    {
-                        await ReleaseLockAsync(lockToken);
-                        _logger.LogInformation("Released lock after generating invoices.");
-                    }
-                }
-                else
-                {
-                    _logger.LogInformation("Could not acquire lock, another instance might be running.");
-                }
+                _logger.LogInformation("Starting to generate invoices...");
+                await GenerateInvoicesAsync(stoppingToken);
 
                 _logger.LogInformation("Waiting for 10 minutes before next run...");
-                await Task.Delay(TimeSpan.FromMinutes(0.1), stoppingToken); // Adjust the interval as needed
+                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken); // Adjust the interval as needed
             }
         }
 
-        private async Task<bool> AcquireLockAsync(string lockToken)
+        private async Task<bool> AcquireLockAsync(string lockKey, string lockToken)
         {
             var db = _redis.GetDatabase();
-            var acquired = await db.StringSetAsync(_lockKey, lockToken, TimeSpan.FromMinutes(5), When.NotExists);
-            if (acquired)
-            {
-                _logger.LogInformation("Lock acquired successfully.");
-            }
-            else
-            {
-                _logger.LogInformation("Failed to acquire lock.");
-            }
-            return acquired;
+            return await db.StringSetAsync(lockKey, lockToken, TimeSpan.FromMinutes(5), When.NotExists);
         }
 
-        private async Task ReleaseLockAsync(string lockToken)
+        private async Task ReleaseLockAsync(string lockKey, string lockToken)
         {
             var db = _redis.GetDatabase();
-            var storedLockToken = await db.StringGetAsync(_lockKey);
+            var storedLockToken = await db.StringGetAsync(lockKey);
             if (storedLockToken == lockToken)
             {
-                await db.KeyDeleteAsync(_lockKey);
-                _logger.LogInformation("Lock released successfully.");
+                await db.KeyDeleteAsync(lockKey);
+                _logger.LogInformation("Lock released successfully for {lockKey}.", lockKey);
             }
             else
             {
-                _logger.LogInformation("Lock token mismatch, lock not released.");
+                _logger.LogInformation("Lock token mismatch, lock not released for {lockKey}.", lockKey);
             }
         }
 
-        private async Task GenerateInvoicesAsync()
+        private async Task GenerateInvoicesAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Generating invoices...");
 
@@ -97,36 +72,65 @@ namespace hoistmt.Services.Billing
                     var today = DateTime.UtcNow.Date;
                     var companiesToBill = await dbContext.Companies
                         .Where(c => c.NextBilling.Date == today)
-                        .ToListAsync();
+                        .ToListAsync(stoppingToken);
 
                     foreach (var company in companiesToBill)
                     {
-                        var subscription = await dbContext.plansubscriptions
-                            .FirstOrDefaultAsync(s => s.id == company.PlanID);
+                        var lockKey = $"{_lockKeyPrefix}{company.CompanyID}";
+                        var lockToken = Guid.NewGuid().ToString();
 
-                        if (subscription == null)
+                        if (await AcquireLockAsync(lockKey, lockToken))
                         {
-                            _logger.LogWarning("No subscription found for PlanID {PlanID}.", company.PlanID);
-                            continue;
+                            try
+                            {
+                                var subscription = await dbContext.plansubscriptions
+                                    .FirstOrDefaultAsync(s => s.id == company.PlanID, stoppingToken);
+
+                                if (subscription == null)
+                                {
+                                    _logger.LogWarning("No subscription found for PlanID {PlanID}.", company.PlanID);
+                                    continue;
+                                }
+
+                                var newInvoice = new CompanInvoice
+                                {
+                                    CompanyID = company.CompanyID,
+                                    Amount = subscription.MonthlyCost, // Assuming monthly billing
+                                    Status = "Due",
+                                    CreatedDate = today,
+                                    DueDate = today.AddDays(7) // Setting due date to 7 days from creation
+                                };
+
+                                dbContext.companyinvoices.Add(newInvoice);
+
+                                // Update billing dates
+                                company.PrevBilling = today;
+                                company.NextBilling = today.AddDays(30); // Assuming monthly billing
+
+                                await dbContext.SaveChangesAsync(stoppingToken);
+                                _logger.LogInformation("Invoice generated successfully for company {CompanyID}.", company.CompanyID);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error generating invoice for company {CompanyID}.", company.CompanyID);
+                            }
+                            finally
+                            {
+                                await ReleaseLockAsync(lockKey, lockToken);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogInformation("Could not acquire lock for company {CompanyID}, another instance might be generating its invoice.", company.CompanyID);
                         }
 
-                        var newInvoice = new CompanInvoice
+                        if (stoppingToken.IsCancellationRequested)
                         {
-                            CompanyID = company.CompanyID,
-                            Amount = subscription.MonthlyCost, // Assuming monthly billing
-                            Status = "Due",
-                            CreatedDate = today,
-                            DueDate = today.AddDays(7) // Setting due date to 7 days from creation
-                        };
-
-                        dbContext.companyinvoices.Add(newInvoice);
-
-                        // Update billing dates
-                        company.PrevBilling = today;
-                        company.NextBilling = today.AddDays(30); // Assuming monthly billing
+                            _logger.LogInformation("Cancellation requested, stopping processing.");
+                            break;
+                        }
                     }
 
-                    await dbContext.SaveChangesAsync();
                     _logger.LogInformation("Invoices generated successfully.");
                 }
                 catch (Exception ex)
