@@ -44,7 +44,7 @@ namespace hoistmt.Controllers
             }
 
             // Fetch the invoice from the master database
-            var invoice = await tenantDbContext.companyinvoices.FirstOrDefaultAsync(i => i.InvoiceID == request.InvoiceID);
+            var invoice = await _context.companyinvoices.FirstOrDefaultAsync(i => i.InvoiceID == request.InvoiceID);
             if (invoice == null)
             {
                 return NotFound("Invoice not found.");

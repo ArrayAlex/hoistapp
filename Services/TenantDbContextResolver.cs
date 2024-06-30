@@ -19,9 +19,14 @@ public class TenantDbContextResolver<TContext> : ITenantDbContextResolver<TConte
         _dbContext = dbContext;
     }
 
-    public async Task<TContext> GetTenantDbContextAsync()
+    public async Task<TContext> GetTenantDbContextAsync(string tenant = null)
     {
         var tenantSchemaName = _httpContextAccessor.HttpContext.Session.GetString("CompanyDb");
+        if (tenant != null)
+        {
+            tenantSchemaName = tenant;
+        }
+
         if (tenantSchemaName == null)
         {
             return null;
@@ -66,6 +71,6 @@ public class TenantDbContextResolver<TContext> : ITenantDbContextResolver<TConte
 
 public interface ITenantDbContextResolver<TContext>
 {
-    Task<TContext> GetTenantDbContextAsync();
+    Task<TContext> GetTenantDbContextAsync(string tenant = null);
     Task<TContext> GetTenantLoginDbContextAsync(string companyid); // Add the parameter
 }

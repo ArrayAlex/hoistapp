@@ -49,7 +49,7 @@ namespace hoistmt.Controllers
         [HttpGet("{id}")] 
         public async Task<ActionResult<DbTenant>> GetTenant(int id)
         {
-            var tenant = await _context.Tenants.FindAsync(id);
+            var tenant = await _context.tenants.FindAsync(id);
         
             if (tenant == null)
             {

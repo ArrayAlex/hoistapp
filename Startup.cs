@@ -4,6 +4,8 @@ using hoistmt.Data;
 using hoistmt.Services;
 using hoistmt.Functions;
 using hoistmt.HttpClients;
+using hoistmt.Services.Billing;
+using StackExchange.Redis;
 
 namespace hoistmt;
 
@@ -30,14 +32,12 @@ public class Startup
                 });
         });
 
-        // Configure Redis cache for session state
         services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = Configuration.GetConnectionString("RedisConnection");
             options.InstanceName = "HoistSession_";
         });
 
-        // Configure session to use Redis
         services.AddSession(options =>
         {
             options.Cookie.Name = "HoistSession";
@@ -52,7 +52,6 @@ public class Startup
         services.AddHttpContextAccessor();
         services.AddHttpClient<RegoSearch>();
 
-        // Add your database context
         services.AddDbContext<MasterDbContext>(options =>
             options.UseMySql(
                 Configuration.GetConnectionString("MasterConnectionRemote"),
@@ -63,13 +62,17 @@ public class Startup
                 Configuration.GetConnectionString("tenantConnectionRemote"),
                 new MySqlServerVersion(new Version(8, 0, 23))));
 
-        // Register TenantDbContextResolver as a scoped service
         services.AddScoped(typeof(ITenantDbContextResolver<>), typeof(TenantDbContextResolver<>));
         services.AddScoped<TenantService>();
         services.AddScoped<TokenHandler>();
         services.AddScoped<Credits>();
         services.AddScoped<AccountSubscription >();
         services.AddScoped<StripeService>();
+        services.AddSingleton<IConnectionMultiplexer>(provider =>
+        {
+            var configuration = ConfigurationOptions.Parse(Configuration.GetConnectionString("RedisConnection"), true);
+            return ConnectionMultiplexer.Connect(configuration);
+        });
         services.AddSingleton<JwtService>(provider =>
         {
             var secretKey = Configuration["JWT_SECRET_KEY"] ?? "wabZ$Aa)]b7tF[[YvhqS*:dkzz9w";
@@ -78,6 +81,10 @@ public class Startup
         });
 
         services.AddTransient<DatabaseInitializer>();
+
+        // Register background services
+        services.AddHostedService<GenerateInvoiceService>();
+        services.AddHostedService<ChargeInvoiceService>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseInitializer dbInitializer)
@@ -114,9 +121,8 @@ public class Startup
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
-        app.UseSession(); // Ensure this is before UseRouting
+        app.UseSession();
         app.UseRouting();
-
         app.UseAuthorization();
 
         app.UseEndpoints(endpoints =>
@@ -130,3 +136,4 @@ public class Startup
         task.Wait();
     }
 }
+

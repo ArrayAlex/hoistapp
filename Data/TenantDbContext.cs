@@ -12,7 +12,7 @@ public class TenantDbContext : DbContext
 
     public DbSet<Vehicle> vehicles { get; set; }
     public DbSet<Appointment> appointments { get; set; }
-    public DbSet<CompanInvoice> companyinvoices { get; set; }
+    //public DbSet<CompanInvoice> companyinvoices { get; set; }
     public DbSet<UserAccount> accounts { get; set; }
     public DbSet<PaymentGateway> paymentgateway { get; set; }
     

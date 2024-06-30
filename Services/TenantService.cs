@@ -26,14 +26,14 @@ public class TenantService
 
             
             
-        var existingTenant = await _context.Tenants.FirstOrDefaultAsync(t => t.DatabaseName == dbTenant.DatabaseName);
+        var existingTenant = await _context.tenants.FirstOrDefaultAsync(t => t.DatabaseName == dbTenant.DatabaseName);
         if (existingTenant != null)
         {
             // DatabaseName is already taken, return appropriate response
             Console.WriteLine("DatabaseName is already taken.");
         }
         // Add the new tenant to the Tenants table
-        _context.Tenants.Add(dbTenant);
+        _context.tenants.Add(dbTenant);
         await _context.SaveChangesAsync();
 
         // Retrieve tables from the template schema (client_bbt_0001)
