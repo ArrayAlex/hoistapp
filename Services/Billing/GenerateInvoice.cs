@@ -37,7 +37,7 @@ namespace hoistmt.Services.Billing
                 return;
             }
 
-            _logger.LogInformation($"Instance {_instanceId} acquired and starting.");
+            await LogActionAsync($"Instance {_instanceId} acquired and starting.");
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -85,9 +85,25 @@ namespace hoistmt.Services.Billing
             }
         }
 
+        private async Task LogActionAsync(string message)
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MasterDbContext>();
+                var log = new Logs
+                {
+                    instanceid = _instanceId,
+                    message = message
+                };
+                dbContext.logs.Add(log);
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
         private async Task GenerateInvoicesAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Generating invoices...");
+            await LogActionAsync("Generating invoices started");
 
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -115,6 +131,7 @@ namespace hoistmt.Services.Billing
                                 if (subscription == null)
                                 {
                                     _logger.LogWarning("No subscription found for PlanID {PlanID}.", company.PlanID);
+                                    await LogActionAsync($"No subscription found for PlanID {company.PlanID}");
                                     continue;
                                 }
 
@@ -135,10 +152,12 @@ namespace hoistmt.Services.Billing
 
                                 await dbContext.SaveChangesAsync(stoppingToken);
                                 _logger.LogInformation("Invoice generated successfully for company {CompanyID}.", company.CompanyID);
+                                await LogActionAsync($"Invoice generated successfully for company {company.CompanyID}");
                             }
                             catch (Exception ex)
                             {
                                 _logger.LogError(ex, "Error generating invoice for company {CompanyID}.", company.CompanyID);
+                                await LogActionAsync($"Error generating invoice for company {company.CompanyID}: {ex.Message}");
                             }
                             finally
                             {
@@ -148,20 +167,24 @@ namespace hoistmt.Services.Billing
                         else
                         {
                             _logger.LogInformation("Could not acquire lock for company {CompanyID}, another instance might be generating its invoice.", company.CompanyID);
+                            await LogActionAsync($"Could not acquire lock for company {company.CompanyID}, another instance might be generating its invoice.");
                         }
 
                         if (stoppingToken.IsCancellationRequested)
                         {
                             _logger.LogInformation("Cancellation requested, stopping processing.");
+                            await LogActionAsync("Cancellation requested, stopping processing.");
                             break;
                         }
                     }
 
                     _logger.LogInformation("Invoices generated successfully.");
+                    await LogActionAsync("Invoices generated successfully.");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error generating invoices.");
+                    await LogActionAsync($"Error generating invoices: {ex.Message}");
                 }
             }
         }

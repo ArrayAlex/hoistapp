@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using hoistmt.Data;
 using hoistmt.Functions;
+using hoistmt.Models.MasterDbModels;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +40,7 @@ namespace hoistmt.Services.Billing
                 return;
             }
 
-            _logger.LogInformation($"Instance {_instanceId} acquired and starting.");
+            await LogActionAsync($"Instance {_instanceId} acquired and starting.");
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -87,9 +88,25 @@ namespace hoistmt.Services.Billing
             }
         }
 
+        private async Task LogActionAsync(string message)
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MasterDbContext>();
+                var log = new Logs
+                {
+                    instanceid = _instanceId,
+                    message = message
+                };
+                dbContext.logs.Add(log);
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
         private async Task ChargeInvoicesAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Charging invoices...");
+            await LogActionAsync("Charging invoices started");
 
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -107,6 +124,7 @@ namespace hoistmt.Services.Billing
                         .ToListAsync(stoppingToken);
                     
                     _logger.LogInformation("{Count} due invoices found.", dueInvoices.Count);
+                    await LogActionAsync($"{dueInvoices.Count} due invoices found");
 
                     foreach (var invoice in dueInvoices)
                     {
@@ -118,10 +136,13 @@ namespace hoistmt.Services.Billing
                             try
                             {
                                 _logger.LogInformation("Processing invoice {InvoiceID} for company {CompanyID}...", invoice.InvoiceID, invoice.CompanyID);
+                                await LogActionAsync($"Processing invoice {invoice.InvoiceID} for company {invoice.CompanyID}");
+
                                 var tenantDbContext = await tenantDbContextResolver.GetTenantLoginDbContextAsync(invoice.CompanyID);
                                 if (tenantDbContext == null)
                                 {
                                     _logger.LogWarning("Tenant DbContext not available for tenant {CompanyID}.", invoice.CompanyID);
+                                    await LogActionAsync($"Tenant DbContext not available for tenant {invoice.CompanyID}");
                                     continue;
                                 }
 
@@ -129,6 +150,7 @@ namespace hoistmt.Services.Billing
                                 if (paymentMethod == null)
                                 {
                                     _logger.LogWarning("Default payment method not available for tenant {CompanyID}.", invoice.CompanyID);
+                                    await LogActionAsync($"Default payment method not available for tenant {invoice.CompanyID}");
                                     continue;
                                 }
 
@@ -138,14 +160,17 @@ namespace hoistmt.Services.Billing
                                 dbContext.Update(invoice); // Update the invoice status in the master database
                                 await dbContext.SaveChangesAsync(stoppingToken);
                                 _logger.LogInformation("Invoice {InvoiceID} paid successfully.", invoice.InvoiceID);
+                                await LogActionAsync($"Invoice {invoice.InvoiceID} paid successfully");
                             }
                             catch (Exception ex) when (ex is MySqlException mysqlEx && mysqlEx.Message.Contains("doesn't exist"))
                             {
                                 _logger.LogError(mysqlEx, "Table 'paymentgateway' does not exist for tenant {CompanyID}.", invoice.CompanyID);
+                                await LogActionAsync($"Table 'paymentgateway' does not exist for tenant {invoice.CompanyID}: {mysqlEx.Message}");
                             }
                             catch (StripeException ex)
                             {
                                 _logger.LogError(ex, "Payment failed for invoice {InvoiceID}.", invoice.InvoiceID);
+                                await LogActionAsync($"Payment failed for invoice {invoice.InvoiceID}: {ex.Message}");
                             }
                             finally
                             {
@@ -155,20 +180,24 @@ namespace hoistmt.Services.Billing
                         else
                         {
                             _logger.LogInformation("Could not acquire lock for invoice {InvoiceID}, another instance might be processing it.", invoice.InvoiceID);
+                            await LogActionAsync($"Could not acquire lock for invoice {invoice.InvoiceID}, another instance might be processing it.");
                         }
 
                         if (stoppingToken.IsCancellationRequested)
                         {
                             _logger.LogInformation("Cancellation requested, stopping processing.");
+                            await LogActionAsync("Cancellation requested, stopping processing.");
                             break;
                         }
                     }
 
                     _logger.LogInformation("Invoices charged successfully.");
+                    await LogActionAsync("Invoices charged successfully.");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error charging invoices.");
+                    await LogActionAsync($"Error charging invoices: {ex.Message}");
                 }
             }
         }
