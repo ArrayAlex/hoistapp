@@ -18,6 +18,8 @@ namespace hoistmt.Services.Billing
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<GenerateInvoiceService> _logger;
         private readonly string _lockKeyPrefix = "generate-invoice-lock-";
+        private readonly string _instanceKeyPrefix = "generate-invoice-instance-";
+        private string _instanceId;
 
         public GenerateInvoiceService(IConnectionMultiplexer redis, IServiceProvider serviceProvider, ILogger<GenerateInvoiceService> logger)
         {
@@ -28,6 +30,15 @@ namespace hoistmt.Services.Billing
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _instanceId = await AcquireInstanceIdAsync();
+            if (_instanceId == null)
+            {
+                _logger.LogError("Failed to acquire an instance ID.");
+                return;
+            }
+
+            _logger.LogInformation($"Instance {_instanceId} acquired and starting.");
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Starting to generate invoices...");
@@ -38,10 +49,25 @@ namespace hoistmt.Services.Billing
             }
         }
 
+        private async Task<string> AcquireInstanceIdAsync()
+        {
+            var db = _redis.GetDatabase();
+            for (int i = 1; i <= 3; i++)
+            {
+                var instanceKey = $"{_instanceKeyPrefix}{i}";
+                if (await db.StringSetAsync(instanceKey, i.ToString(), TimeSpan.FromMinutes(5), When.NotExists))
+                {
+                    _logger.LogInformation($"Acquired instance ID {i}");
+                    return i.ToString();
+                }
+            }
+            return null;
+        }
+
         private async Task<bool> AcquireLockAsync(string lockKey, string lockToken)
         {
             var db = _redis.GetDatabase();
-            return await db.StringSetAsync(lockKey, lockToken, TimeSpan.FromMinutes(0.1), When.NotExists);
+            return await db.StringSetAsync(lockKey, lockToken, TimeSpan.FromMinutes(5), When.NotExists);
         }
 
         private async Task ReleaseLockAsync(string lockKey, string lockToken)

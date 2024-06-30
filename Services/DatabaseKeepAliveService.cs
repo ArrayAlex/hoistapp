@@ -27,7 +27,7 @@ namespace hoistmt.Services.Billing
                 _logger.LogInformation("Running database keep-alive...");
                 await KeepDatabaseAliveAsync<MasterDbContext>(stoppingToken);
                 await KeepDatabaseAliveAsync<TenantDbContext>(stoppingToken);
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken); // Adjust the interval as needed
+                await Task.Delay(TimeSpan.FromMinutes(25), stoppingToken); // Adjust the interval as needed
             }
         }
 
