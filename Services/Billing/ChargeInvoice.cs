@@ -2,15 +2,15 @@
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using hoistmt.Data;
 using hoistmt.Functions;
-using hoistmt.Models.MasterDbModels;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
-using Stripe;
 
 namespace hoistmt.Services.Billing
 {
@@ -20,21 +20,16 @@ namespace hoistmt.Services.Billing
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<ChargeInvoiceService> _logger;
         private readonly string _lockKeyPrefix = "charge-invoice-lock-";
-        private readonly string _instanceId;
 
         public ChargeInvoiceService(IConnectionMultiplexer redis, IServiceProvider serviceProvider, ILogger<ChargeInvoiceService> logger)
         {
             _redis = redis;
             _serviceProvider = serviceProvider;
             _logger = logger;
-            _instanceId = Environment.GetEnvironmentVariable("WEBSITE_INSTANCE_ID") ?? "UnknownInstance";
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            // Log instance ID every 10 seconds
-            _ = LogInstanceIdPeriodicallyAsync(stoppingToken);
-
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Starting to charge invoices...");
@@ -42,38 +37,6 @@ namespace hoistmt.Services.Billing
 
                 _logger.LogInformation("Waiting for 10 minutes before next run...");
                 await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken); // Adjust the interval as needed
-            }
-        }
-
-        private async Task LogInstanceIdPeriodicallyAsync(CancellationToken stoppingToken)
-        {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await LogInstanceIdAsync();
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-            }
-        }
-
-        private async Task LogInstanceIdAsync()
-        {
-            try
-            {
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<MasterDbContext>();
-                    var log = new Logs
-                    {
-                        instanceid = _instanceId,
-                        message = $"Running instance ID: {_instanceId}"
-                    };
-                    dbContext.logs.Add(log);
-                    await dbContext.SaveChangesAsync();
-                    _logger.LogInformation($"Logged instance ID: {_instanceId}");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error logging instance ID to the database.");
             }
         }
 
@@ -116,7 +79,7 @@ namespace hoistmt.Services.Billing
                     var dueInvoices = await dbContext.companyinvoices
                         .Where(i => i.Status == "Due" && (i.DueDate.Date == today || i.CreatedDate.Date == today))
                         .ToListAsync(stoppingToken);
-
+                    
                     _logger.LogInformation("{Count} due invoices found.", dueInvoices.Count);
 
                     foreach (var invoice in dueInvoices)
