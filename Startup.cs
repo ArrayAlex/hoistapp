@@ -85,6 +85,7 @@ public class Startup
         // Register background services
         services.AddHostedService<GenerateInvoiceService>();
         services.AddHostedService<ChargeInvoiceService>();
+        services.AddHostedService<DatabaseKeepAliveService>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseInitializer dbInitializer)

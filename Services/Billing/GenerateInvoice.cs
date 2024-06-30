@@ -41,7 +41,7 @@ namespace hoistmt.Services.Billing
         private async Task<bool> AcquireLockAsync(string lockKey, string lockToken)
         {
             var db = _redis.GetDatabase();
-            return await db.StringSetAsync(lockKey, lockToken, TimeSpan.FromMinutes(5), When.NotExists);
+            return await db.StringSetAsync(lockKey, lockToken, TimeSpan.FromMinutes(0.1), When.NotExists);
         }
 
         private async Task ReleaseLockAsync(string lockKey, string lockToken)
