@@ -83,8 +83,8 @@ public class Startup
         services.AddTransient<DatabaseInitializer>();
 
         // Register background services
-        services.AddHostedService<GenerateInvoiceService>();
-        services.AddHostedService<ChargeInvoiceService>();
+        // services.AddHostedService<GenerateInvoiceService>();
+        // services.AddHostedService<ChargeInvoiceService>();
         services.AddHostedService<DatabaseKeepAliveService>();
     }
 

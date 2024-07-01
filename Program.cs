@@ -1,4 +1,4 @@
-namespace hoistmt;
+using hoistmt;
 
 public class Program
 {
@@ -11,6 +11,22 @@ public class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                webBuilder.UseStartup<Startup>();
+                webBuilder.UseStartup<Startup>()
+                    .ConfigureKestrel((context, options) =>
+                    {
+                        if (context.HostingEnvironment.IsDevelopment())
+                        {
+                            // For local development, listen on HTTP
+                            options.ListenAnyIP(80);
+                        }
+                        else
+                        {
+                            // For production, listen on HTTPS
+                            options.ListenAnyIP(443, listenOptions =>
+                            {
+                                listenOptions.UseHttps();
+                            });
+                        }
+                    });
             });
 }
