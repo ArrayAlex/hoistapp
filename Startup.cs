@@ -43,9 +43,12 @@ public class Startup
             options.Cookie.Name = "HoistSession";
             options.IdleTimeout = TimeSpan.FromMinutes(120);
             options.Cookie.HttpOnly = true;
+            options.Cookie.SameSite = SameSiteMode.None;
+            
             options.Cookie.IsEssential = true;
             options.Cookie.Domain = Configuration["COOKIE_DOMAIN"] ?? "localhost";
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.Cookie.Path = "/";
         });
 
         services.AddControllersWithViews();

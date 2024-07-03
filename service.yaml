@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hoistmt
+spec:
+  type: LoadBalancer
+  selector:
+    app: hoistmt  # Updated to match your deployment labels
+  ports:
+    - port: 80
+      targetPort: 80  # Assuming your application listens on port 80 inside the container

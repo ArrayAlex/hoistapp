@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hoistmt-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: HoistSession
+    nginx.ingress.kubernetes.io/session-cookie-path: /
+    nginx.ingress.kubernetes.io/session-cookie-hash: sha1
+spec:
+  tls:
+    - hosts:
+        - api.hoist.nz
+      secretName: hoisttls
+  rules:
+    - host: api.hoist.nz
+      http:
+        paths:
+          - path: /.well-known/acme-challenge/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kubdevacr
+                port:
+                  number: 80
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kubdevacr
+                port:
+                  number: 80

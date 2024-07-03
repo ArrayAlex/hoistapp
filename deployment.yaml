@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hoistmt
+  labels:
+    app: hoistmt
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hoistmt
+  template:
+    metadata:
+      labels:
+        app: hoistmt
+    spec:
+      containers:
+        - name: hoistmt
+          image: kubdevacr.azurecr.io/hoistmt:v1
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: COOKIE_DOMAIN
+              value: ".api.hoist.nz"
+      imagePullSecrets:
+        - name: acr-secret01
