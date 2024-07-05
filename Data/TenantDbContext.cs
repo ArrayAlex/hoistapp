@@ -15,6 +15,8 @@ public class TenantDbContext : DbContext
     //public DbSet<CompanInvoice> companyinvoices { get; set; }
     public DbSet<UserAccount> accounts { get; set; }
     public DbSet<PaymentGateway> paymentgateway { get; set; }
+    public DbSet<Booking> Bookings { get; set; } // Ensure this matches the reference in the controller
+
     
     public DbSet<TenantTransactions> tenanttransactions { get; set; }
     public DbSet<Customer> customers { get; set; }
