@@ -23,6 +23,10 @@ namespace hoistmt.Controllers
         public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
         {
             var context = await _tenantDbContextResolver.GetTenantDbContextAsync();
+            if (context == null)
+            {
+                return NotFound("Not logged in.");
+            }
             return await context.Bookings.ToListAsync();
         }
 

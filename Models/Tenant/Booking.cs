@@ -14,10 +14,10 @@ namespace hoistmt.Models
         public string JobType { get; set; } // e.g., Repair, Maintenance, etc.
 
         [Required]
-        public string CustomerName { get; set; }
+        public int CustomerId { get; set; }
 
         [Required]
-        public string VehicleDetails { get; set; } // e.g., Make, Model, Year
+        public int VehicleId { get; set; } // e.g., Make, Model, Year
 
         [Required]
         public string ContactNumber { get; set; }
@@ -35,10 +35,7 @@ namespace hoistmt.Models
 
         public string Notes { get; set; }
 
-        // Foreign key to Tenant (assuming multi-tenancy setup)
-        [Required]
-        public int TenantId { get; set; }
-
+        // Foreign key to Tenant (assuming multi-tenancy setup
         // Additional fields as necessary
     }
 }
