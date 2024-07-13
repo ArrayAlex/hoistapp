@@ -175,7 +175,7 @@ namespace hoistmt.Services
             tenant.ResetTokenExpiry = null;
 
             await dbContext.SaveChangesAsync();
-            await _context.SaveChangesAsync();
+            
         }
     }
 }
