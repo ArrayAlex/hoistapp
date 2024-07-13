@@ -43,7 +43,7 @@ namespace hoistmt.Controllers
             }
 
             var account = await dbContext.Set<UserAccount>()
-                .FirstOrDefaultAsync(a => a.Username == model.Username && a.Password == model.Password);
+                .FirstOrDefaultAsync(a => a.Username == model.Username && a.Password == model.Password && a.IsVerified == true);
 
             if (account == null)
             {
