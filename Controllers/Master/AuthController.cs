@@ -47,7 +47,7 @@ namespace hoistmt.Controllers
 
             if (account == null)
             {
-                System.Diagnostics.Trace.WriteLine("Invalid username or password");
+                System.Diagnostics.Trace.WriteLine("Invalid username or password"); 
                 return Unauthorized("Invalid username or password");
             }
 

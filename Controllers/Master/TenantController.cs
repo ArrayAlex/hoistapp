@@ -4,6 +4,7 @@ using hoistmt.Models;
 using hoistmt.Services;
 using System;
 using System.Threading.Tasks;
+using hoistmt.Models.httpModels;
 
 namespace hoistmt.Controllers
 {
@@ -97,11 +98,11 @@ p {{{{ font-size: 1.1em; color: #333; }}}}
 
 
         [HttpPost("request-password-reset")]
-        public async Task<IActionResult> RequestPasswordReset(string email, string databaseName)
+        public async Task<IActionResult> RequestPasswordReset([FromBody] PasswordResetRequest request)
         {
             try
             {
-                await _tenantService.RequestPasswordReset(email, databaseName);
+                await _tenantService.RequestPasswordReset(request.Email, request.DatabaseName);
                 return Ok("Password reset email sent.");
             }
             catch (Exception ex)
@@ -111,7 +112,7 @@ p {{{{ font-size: 1.1em; color: #333; }}}}
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(string token, string newPassword, string databaseName)
+        public async Task<IActionResult> ResetPassword([FromQuery] string token, [FromQuery] string newPassword, [FromQuery] string databaseName)
         {
             try
             {
