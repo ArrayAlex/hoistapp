@@ -2,7 +2,8 @@
 using hoistmt.Data;
 using hoistmt.Models;
 using hoistmt.Services;
-using Microsoft.EntityFrameworkCore;
+using System;
+using System.Threading.Tasks;
 
 namespace hoistmt.Controllers
 {
@@ -10,57 +11,71 @@ namespace hoistmt.Controllers
     [ApiController]
     public class TenantController : ControllerBase
     {
-        
-        private readonly MasterDbContext _context;
         private readonly TenantService _tenantService;
 
-    
-        public TenantController(MasterDbContext context, TenantService tenantService)
+        public TenantController(TenantService tenantService)
         {
-            _context = context;
             _tenantService = tenantService;
         }
-        
+
         [HttpPost("register")]
-        // /api/Tenant/register
         public async Task<ActionResult<DbTenant>> CreateTenant(newUser newUser)
         {
             try
             {
-                if(newUser.DatabaseName == "" || newUser.Name == "" || newUser.email == "" || newUser.Password == ""  || newUser.Username == "")
-                {
-                    return BadRequest("All fields are required. ");
-                }
-                {
-                    return BadRequest("DatabaseName is required. ");
-                }
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
+                var tenant = await _tenantService.CreateTenant(newUser);
+                return Ok(tenant);
             }
             catch (Exception ex)
             {
-                // Handle other exceptions
-                return StatusCode(500, $"An error occurred while creating the tenant. {ex.Message}");
+                return StatusCode(500, $"An error occurred while creating the tenant: {ex.Message}");
             }
         }
-        
-        [HttpGet("{id}")] 
-        public async Task<ActionResult<DbTenant>> GetTenant(int id)
-        {
-            var tenant = await _context.tenants.FindAsync(id);
-        
-            if (tenant == null)
-            {
-                return NotFound();
-            }
-        
-            return tenant;
-        }
-       
-    }
-    
-    
 
+        [HttpGet("verify-email")]
+        public async Task<IActionResult> VerifyEmail(string token, string databaseName)
+        {
+            if(token == null|| databaseName == null)
+            {
+                return BadRequest("Token and database name are required.");
+            }
+            try
+            {
+                await _tenantService.VerifyEmail(token, databaseName);
+                return Ok("Email verified successfully!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("request-password-reset")]
+        public async Task<IActionResult> RequestPasswordReset(string email, string databaseName)
+        {
+            try
+            {
+                await _tenantService.RequestPasswordReset(email, databaseName);
+                return Ok("Password reset email sent.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(string token, string newPassword, string databaseName)
+        {
+            try
+            {
+                await _tenantService.ResetPassword(token, newPassword, databaseName);
+                return Ok("Password reset successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+    }
 }

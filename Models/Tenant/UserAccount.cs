@@ -6,7 +6,7 @@ public class UserAccount
     public int Id { get; set; }
     public string Name { get; set; }
     public string Password { get; set; }
-    public string contact { get; set; }
+    public string? contact { get; set; }
     public string email { get; set; }
     public bool Active { get; set; }
     public string Username { get; set; }
@@ -18,5 +18,10 @@ public class UserAccount
     public string? phone { get; set; }
 
     public int roleID { get; set; }
+    public string? ResetToken { get; set; }
+    public DateTime? ResetTokenExpiry { get; set; }
+    public string? VerificationToken { get; set; }
+    public DateTime? VerificationTokenExpiry { get; set; }
+    public bool? IsVerified { get; set; }
     
 }

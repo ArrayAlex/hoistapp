@@ -1,115 +1,188 @@
 ﻿using hoistmt.Data;
-using Microsoft.EntityFrameworkCore;
-
 using hoistmt.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace hoistmt.Services;
-
-public class TenantService
+namespace hoistmt.Services
 {
-    private readonly MasterDbContext _context;
-
-    public TenantService(MasterDbContext context)
+    public class TenantService
     {
-        _context = context;
-    }
+        private readonly MasterDbContext _context;
+        private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
+        private readonly EmailService _emailService;
 
-    public async Task<DbTenant> CreateTenant(newUser newUser)
-    {
-
-        DbTenant dbTenant = new DbTenant {
-            Name = newUser.Name,
-            Username = newUser.Username,
-            Password = newUser.Password,
-            DatabaseName = newUser.DatabaseName
-        };
-
-            
-            
-        var existingTenant = await _context.tenants.FirstOrDefaultAsync(t => t.DatabaseName == dbTenant.DatabaseName);
-        if (existingTenant != null)
+        public TenantService(MasterDbContext context, ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, EmailService emailService)
         {
-            // DatabaseName is already taken, return appropriate response
-            System.Diagnostics.Trace.WriteLine("DatabaseName is already taken.");
-        }
-        // Add the new tenant to the Tenants table
-        _context.tenants.Add(dbTenant);
-        await _context.SaveChangesAsync();
-
-        // Retrieve tables from the template schema (client_bbt_0001)
-        var tablesInTemplateSchema = await GetTablesInTemplateSchema();
-
-        // Check if the template schema exists
-        if (!tablesInTemplateSchema.Any())
-        {
-            throw new Exception("No tables found in the template schema.");
+            _context = context;
+            _tenantDbContextResolver = tenantDbContextResolver;
+            _emailService = emailService;
         }
 
-        // Create a new schema with the name specified in DatabaseName property
-        var newSchemaName = dbTenant.DatabaseName;
-        var createSchemaSql = $"CREATE SCHEMA `{newSchemaName}`";
-        await _context.Database.ExecuteSqlRawAsync(createSchemaSql);
-        var templateSchemaName = "templateSchema";
-        // Copy structure and data from the template schema to the new schema
-        foreach (var table in tablesInTemplateSchema)
+        public async Task<DbTenant> CreateTenant(newUser newUser)
         {
-            var copyTableSql = $"CREATE TABLE `{newSchemaName}`.`{table}` LIKE `{templateSchemaName}`.`{table}`;" +
-                               $"INSERT INTO `{newSchemaName}`.`{table}` SELECT * FROM `{templateSchemaName}`.`{table}`";
-            await _context.Database.ExecuteSqlRawAsync(copyTableSql);
-        }
-            
-        User user = new User
-        {
-            Name = newUser.Name,
-            Password = newUser.Password,
-            Username = newUser.Username,
-            email = newUser.email,
-            phone = newUser.phone,
-            roleID = 1,
-            Active = 1,
-            roleName = "Admin"
-        };
-        // Insert tenant data into the accounts table for the new schema
-        await InsertTenantIntoAccounts(user, newSchemaName);
-
-        return dbTenant;
-    }
-
-    private async Task InsertTenantIntoAccounts(User user, string schemaName)
-    {
-        // Determine the value for the phone field
-        string phoneValue = string.IsNullOrEmpty(user.phone) ? "NULL" : $"'{user.phone}'";
-
-        // Construct the SQL insert statement
-        var insertSql = $"INSERT INTO `{schemaName}`.accounts (Name, Password, Username, email, Active, roleID, roleName, phone) " +
-                        $"VALUES ('{user.Name}', '{user.Password}', '{user.Username}', '{user.email}', {user.Active}, {user.roleID}, '{user.roleName}', {phoneValue})";
-
-        // Log the SQL statement before executing
-
-        // Execute the SQL command
-        await _context.Database.ExecuteSqlRawAsync(insertSql);
-    }
-
-    private async Task<List<string>> GetTablesInTemplateSchema()
-    {
-        // Assuming the template schema name is 'client_bbt_0001'
-        var templateSchemaName = "templateSchema";
-
-        // Retrieve table names from INFORMATION_SCHEMA.TABLES
-        var tables = new List<string>();
-        using (var command = _context.Database.GetDbConnection().CreateCommand())
-        {
-            command.CommandText = $"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{templateSchemaName}'";
-            _context.Database.OpenConnection();
-            using (var reader = await command.ExecuteReaderAsync())
+            if (string.IsNullOrEmpty(newUser.DatabaseName) || string.IsNullOrEmpty(newUser.Name) || string.IsNullOrEmpty(newUser.Email) || string.IsNullOrEmpty(newUser.Password) || string.IsNullOrEmpty(newUser.Username))
             {
-                while (await reader.ReadAsync())
+                throw new ArgumentException("All fields are required.");
+            }
+
+            DbTenant dbTenant = new DbTenant
+            {
+                Name = newUser.Name,
+                Username = newUser.Username,
+                Password = newUser.Password,
+                DatabaseName = newUser.DatabaseName,
+            };
+
+            var existingTenant = await _context.tenants.FirstOrDefaultAsync(t => t.DatabaseName == dbTenant.DatabaseName);
+            if (existingTenant != null)
+            {
+                throw new InvalidOperationException("DatabaseName is already taken.");
+            }
+
+            _context.tenants.Add(dbTenant);
+            await _context.SaveChangesAsync();
+
+            var tablesInTemplateSchema = await GetTablesInTemplateSchema();
+
+            if (!tablesInTemplateSchema.Any())
+            {
+                throw new Exception("No tables found in the template schema.");
+            }
+
+            var newSchemaName = dbTenant.DatabaseName;
+            var templateSchemaName = "templateschema";
+            var tenantDbContext = await _tenantDbContextResolver.GetTenantDbContextAsync(templateSchemaName);
+            var createSchemaSql = $"CREATE SCHEMA `{newSchemaName}`";
+            await tenantDbContext.Database.ExecuteSqlRawAsync(createSchemaSql);
+            
+
+            foreach (var table in tablesInTemplateSchema)
+            {
+                var copyTableSql = $"CREATE TABLE `{newSchemaName}`.`{table}` LIKE `{templateSchemaName}`.`{table}`;" +
+                                   $"INSERT INTO `{newSchemaName}`.`{table}` SELECT * FROM `{templateSchemaName}`.`{table}`";
+                await tenantDbContext.Database.ExecuteSqlRawAsync(copyTableSql);
+            }
+
+            tenantDbContext = await _tenantDbContextResolver.GetTenantDbContextAsync(newSchemaName);
+            UserAccount user = new UserAccount
+            {
+                Name = newUser.Name,
+                Password = newUser.Password,
+                Username = newUser.Username,
+                email = newUser.Email,
+                phone = newUser.phone,
+                roleID = 1,
+                Active = true,
+                roleName = "Admin",
+                VerificationToken = GenerateToken(),
+                VerificationTokenExpiry = DateTime.UtcNow.AddHours(24),
+                IsVerified = false
+            };
+
+            tenantDbContext.accounts.Add(user);
+            await tenantDbContext.SaveChangesAsync();
+
+            var verificationUrl = $"http://localhost/api/Tenant/verify-email?token={user.VerificationToken}&databaseName={newSchemaName}";
+            var message = $"Please verify your email by clicking <a href='{verificationUrl}'>here</a>.";
+            await _emailService.SendEmailAsync(user.email, "Email Verification", message);
+
+            return dbTenant;
+        }
+
+        private async Task<List<string>> GetTablesInTemplateSchema()
+        {
+            var templateSchemaName = "templateschema";
+            var tenantDbContext = await _tenantDbContextResolver.GetTenantDbContextAsync(templateSchemaName);
+            var tables = new List<string>();
+            using (var command = tenantDbContext.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = $"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{templateSchemaName}'";
+                tenantDbContext.Database.OpenConnection();
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    tables.Add(reader.GetString(0));
+                    while (await reader.ReadAsync())
+                    {
+                        tables.Add(reader.GetString(0));
+                    }
                 }
+            }
+            return tables;
+        }
+
+        private string GenerateToken()
+        {
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                byte[] tokenData = new byte[32];
+                rng.GetBytes(tokenData);
+                return Convert.ToBase64String(tokenData);
             }
         }
 
-        return tables;
+        public async Task VerifyEmail(string token, string databaseName)
+        {
+            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync(databaseName);
+            var tenant = await dbContext.accounts.FirstOrDefaultAsync(t => t.VerificationToken == token && t.VerificationTokenExpiry > DateTime.UtcNow);
+            if (tenant == null)
+            {
+                throw new InvalidOperationException("Invalid or expired token.");
+            }
+
+            tenant.IsVerified = true;
+            tenant.VerificationToken = null;
+            tenant.VerificationTokenExpiry = null;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RequestPasswordReset(string email, string databaseName)
+        {
+            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync(databaseName);
+            var tenant = await dbContext.accounts.FirstOrDefaultAsync(t => t.email == email);
+            if (tenant == null)
+            {
+                throw new InvalidOperationException("Email not found.");
+            }
+
+            tenant.ResetToken = GenerateToken();
+            tenant.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
+
+            await _context.SaveChangesAsync();
+
+            var resetUrl = $"https://api.hoist.nz/api/Tenant/reset-password?token={tenant.ResetToken}";
+            var message = $"You can reset your password by clicking <a href='{resetUrl}'>here</a>.";
+            await _emailService.SendEmailAsync(tenant.email, "Password Reset", message);
+        }
+
+        public async Task ResetPassword(string token, string newPassword, string databaseName)
+        {
+            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync(databaseName);
+            
+            var tenant = await dbContext.accounts.FirstOrDefaultAsync(t => t.ResetToken == token && t.ResetTokenExpiry > DateTime.UtcNow);
+            if (tenant == null)
+            {
+                throw new InvalidOperationException("Invalid or expired token.");
+            }
+
+            
+            var user = await dbContext.accounts.FirstOrDefaultAsync(u => u.email == tenant.email);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found.");
+            }
+
+            user.Password = newPassword;
+
+            tenant.ResetToken = null;
+            tenant.ResetTokenExpiry = null;
+
+            await dbContext.SaveChangesAsync();
+            await _context.SaveChangesAsync();
+        }
     }
 }

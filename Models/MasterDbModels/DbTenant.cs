@@ -4,10 +4,10 @@
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string DatabaseName { get; set; } // Correct casing
-        public string Username { get; set; } // Correct casing
-        public string Password { get; set; } // Correct casin
+        public string Username { get; set; }
 
-        
+        public string Password { get; set; }
+        public string DatabaseName { get; set; }
+       
     }
 }

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: hoistmt
-          image: kubdevacr.azurecr.io/hoistmt:v1
+          image: kubdevacr.azurecr.io/hoistmt:v11
           ports:
             - containerPort: 80
           env:

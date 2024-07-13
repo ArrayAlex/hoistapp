@@ -7,7 +7,7 @@ namespace hoistmt.Models
         public string Name { get; set; }
         public string Password { get; set; } // Correct casing
         public string Username { get; set; } // Correct casing
-        public string email { get; set; } // Correct casing
+        public string Email { get; set; } // Correct casing
 
         public int Active { get; set; }
 
@@ -19,6 +19,8 @@ namespace hoistmt.Models
         public string? phone { get; set; }
 
         public string DatabaseName { get; set; } // Correct casing
+        
+        
         
     }
 }
