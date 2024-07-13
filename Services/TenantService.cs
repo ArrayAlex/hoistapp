@@ -1,5 +1,6 @@
 ﻿using hoistmt.Data;
 using hoistmt.Models;
+using hoistmt.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -79,7 +80,7 @@ namespace hoistmt.Services
                 roleID = 1,
                 Active = true,
                 roleName = "Admin",
-                VerificationToken = GenerateToken(),
+                VerificationToken = Services.TokenGenerator.GenerateToken(),
                 VerificationTokenExpiry = DateTime.UtcNow.AddHours(24),
                 IsVerified = false
             };
@@ -87,7 +88,7 @@ namespace hoistmt.Services
             tenantDbContext.accounts.Add(user);
             await tenantDbContext.SaveChangesAsync();
 
-            var verificationUrl = $"http://localhost/api/Tenant/verify-email?token={user.VerificationToken}&databaseName={newSchemaName}";
+            var verificationUrl = $"https://api.hoist.nz/api/Tenant/verify-email?token={user.VerificationToken}&databaseName={dbTenant.DatabaseName}";
             var message = $"Please verify your email by clicking <a href='{verificationUrl}'>here</a>.";
             await _emailService.SendEmailAsync(user.email, "Email Verification", message);
 
@@ -114,15 +115,7 @@ namespace hoistmt.Services
             return tables;
         }
 
-        private string GenerateToken()
-        {
-            using (var rng = new RNGCryptoServiceProvider())
-            {
-                byte[] tokenData = new byte[32];
-                rng.GetBytes(tokenData);
-                return Convert.ToBase64String(tokenData);
-            }
-        }
+        
 
         public async Task VerifyEmail(string token, string databaseName)
         {
@@ -149,7 +142,7 @@ namespace hoistmt.Services
                 throw new InvalidOperationException("Email not found.");
             }
 
-            tenant.ResetToken = GenerateToken();
+            tenant.ResetToken = Services.TokenGenerator.GenerateToken();
             tenant.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
 
             await _context.SaveChangesAsync();
