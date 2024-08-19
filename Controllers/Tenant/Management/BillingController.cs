@@ -8,6 +8,7 @@ using System.Linq;
 using hoistmt.Data;
 using hoistmt.Models.MasterDbModels;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace hoistmt.Controllers
 {
@@ -200,6 +201,33 @@ namespace hoistmt.Controllers
             await dbContext.SaveChangesAsync();
 
             return Ok(new { Message = "Default payment method updated successfully" });
+        }
+
+        [HttpGet("billing-info")]
+        public async Task<IActionResult> getBillingInfo()
+        {
+            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
+            if (dbContext == null)
+            {
+                return NotFound("Tenant DbContext not available for the retrieved database.");
+            }
+
+            //a json encoded hard coded list / array of billing info incluing business name and address
+            // multiple indexes/objects 
+            var billingInfo = new[]
+            {
+                new { BusinessName = "Hoist", Address = "123 Fake Street" },
+                new { BusinessName = "Hoist", Address = "123 Fake Street" },
+                new { BusinessName = "Hoist", Address = "123 Fake Street" }
+            };
+            
+            
+
+
+            //fix the code above
+
+
+            return Ok(billingInfo);
         }
         
     }
