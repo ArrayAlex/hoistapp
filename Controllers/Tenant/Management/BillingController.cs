@@ -9,6 +9,7 @@ using hoistmt.Data;
 using hoistmt.Models.MasterDbModels;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using hoistmt.Models.Billing;
 
 namespace hoistmt.Controllers
 {
@@ -215,6 +216,30 @@ namespace hoistmt.Controllers
             var billingInfo = await dbContext.company.AsNoTracking().ToListAsync();        
 
             return Ok(billingInfo);
+        }
+
+        [HttpPut("update-billing-info")]
+        public async Task<IActionResult> updateBillingInfo([FromBody] AccountBillingInfo request){
+            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
+            if (dbContext == null)
+            {
+                return NotFound("Tenant DbContext not available for the retrieved database.");
+            }
+
+            var billingInfo = await dbContext.company.FirstOrDefaultAsync();
+            if (billingInfo == null)
+            {
+                return NotFound("Billing info not found.");
+            }
+
+            billingInfo.BusinessName = request.BusinessName;
+            billingInfo.AddressLine1 = request.AddressLine1;
+            billingInfo.City = request.City;
+            billingInfo.Country = request.Country;
+
+            await dbContext.SaveChangesAsync();
+
+            return Ok(new { Message = "Billing info updated successfully" });
         }
         
     }
