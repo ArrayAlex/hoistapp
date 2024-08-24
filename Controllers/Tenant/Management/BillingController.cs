@@ -212,20 +212,7 @@ namespace hoistmt.Controllers
                 return NotFound("Tenant DbContext not available for the retrieved database.");
             }
 
-            //a json encoded hard coded list / array of billing info incluing business name and address
-            // multiple indexes/objects 
-            var billingInfo = new[]
-            {
-                new { BusinessName = "Hoist", Address = "123 Fake Street" },
-                new { BusinessName = "Hoist", Address = "123 Fake Street" },
-                new { BusinessName = "Hoist", Address = "123 Fake Street" }
-            };
-            
-            
-
-
-            //fix the code above
-
+            var billingInfo = await dbContext.company.AsNoTracking().ToListAsync();        
 
             return Ok(billingInfo);
         }

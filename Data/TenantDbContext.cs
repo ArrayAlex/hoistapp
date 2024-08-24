@@ -1,5 +1,6 @@
 ﻿
 using hoistmt.Models;
+using hoistmt.Models.Billing;
 using hoistmt.Models.MasterDbModels;
 using hoistmt.Models.Tenant.Billing;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ public class TenantDbContext : DbContext
     public DbSet<Appointment> appointments { get; set; }
     //public DbSet<CompanInvoice> companyinvoices { get; set; }
     public DbSet<UserAccount> accounts { get; set; }
+    public DbSet<AccountBillingInfo> company { get; set; }
     public DbSet<PaymentGateway> paymentgateway { get; set; }
     public DbSet<Booking> Bookings { get; set; } // Ensure this matches the reference in the controller
 
