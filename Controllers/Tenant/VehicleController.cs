@@ -1,6 +1,7 @@
 ﻿
 using hoistmt.Models;
 using hoistmt.Services;
+using hoistmt.Services.lib;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,38 +13,48 @@ namespace hoistmt.Controllers
     public class VehicleController : ControllerBase
     {
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
-
-        public VehicleController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver)
+        private VehicleService _vehicleService;
+        public VehicleController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, VehicleService vehicleService)
         {
             _tenantDbContextResolver = tenantDbContextResolver;
+            _vehicleService = vehicleService;
         }
         
-        [HttpGet("Vehicles")]
+        [HttpGet("vehicles")]
         public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
         {
-            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-            if (dbContext == null)
+            try
             {
-                return Unauthorized("Invalid session");
+                var vehicles = await _vehicleService.GetVehiclesAsync();
+                return Ok(vehicles);
             }
-
-            var vehicles = await dbContext.vehicles.ToListAsync();
-            return Ok(vehicles);
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
         
         [HttpPost("add")]
         public async Task<IActionResult> AddVehicle([FromBody] Vehicle vehicle)
         {
-            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-            if (dbContext == null)
+            try
             {
-                return Unauthorized("Invalid session");
+                var addedVehicle = await _vehicleService.AddVehicleAsync(vehicle);
+                return CreatedAtAction(nameof(GetVehicles), new { id = addedVehicle.id });
             }
-
-            dbContext.vehicles.Add(vehicle); // Assuming VehicleModel maps to the Vehicle entity
-            await dbContext.SaveChangesAsync();
-
-            return Ok("Vehicle added successfully");
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
         
         [HttpGet("vehicle/{id}")]
@@ -51,24 +62,16 @@ namespace hoistmt.Controllers
         {
             try
             {
-                var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-                if (dbContext == null)
-                {
-                    return Unauthorized("Invalid session");
-                }
-
-                var vehicle = await dbContext.vehicles.FindAsync(id);
-                if (vehicle != null)
-                {
-                    return Ok(vehicle);
-                }
-
-                return NotFound(); // Vehicle with the specified ID not found
+                var vehicle = await _vehicleService.GetVehicleDetails(id);
+                return Ok(vehicle);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
-                // If any exceptions occur during the process, return Internal Server Error
-                return StatusCode(500, "Internal Server Error: " + ex.Message);
+                return StatusCode(500, "An error occurred while processing your request.");
             }
         }
 
@@ -77,25 +80,18 @@ namespace hoistmt.Controllers
         {
             try
             {
-                var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-                if (dbContext == null)
-                {
-                    return Unauthorized("Invalid session");
-                }
-
-                var vehicles = await dbContext.vehicles.Where(v => v.customerid == customerId).ToListAsync();
-                if (vehicles != null && vehicles.Any())
-                {
-                    return Ok(vehicles);
-                }
-
-                return NotFound(); // No vehicles found for the specified customer ID
+                var vehicles = await _vehicleService.GetVehiclesByCustomerId(customerId);
+                return Ok(vehicles);
+            }
+            catch(UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
-                // If any exceptions occur during the process, return Internal Server Error
-                return StatusCode(500, "Internal Server Error: " + ex.Message);
+                return StatusCode(500, "An error occurred while processing your request.");
             }
+            
         }
 
         
