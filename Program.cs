@@ -13,6 +13,6 @@ public class Program
             {
                 webBuilder.UseStartup<Startup>();
 
-                webBuilder.UseUrls("http://localhost:8080");
+                webBuilder.UseUrls("http://0.0.0.0:80");
             });
 }

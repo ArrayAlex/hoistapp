@@ -23,6 +23,6 @@ spec:
             - name: ASPNETCORE_ENVIRONMENT
               value: "Production"
             - name: COOKIE_DOMAIN
-              value: ".api.hoist.nz"
+              value: ".hoist.nz"
       imagePullSecrets:
         - name: acr-secret01
