@@ -11,6 +11,11 @@ namespace hoistmt.Services.lib
     {
         public UnauthorizedException(string message) : base(message) { }
     }
+
+    public class NotFound : Exception
+    {
+        public NotFound(string message) : base(message) { }
+    }
     
     public interface IVehicleService
     {

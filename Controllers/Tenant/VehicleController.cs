@@ -81,6 +81,10 @@ namespace hoistmt.Controllers
             try
             {
                 var vehicles = await _vehicleService.GetVehiclesByCustomerId(customerId);
+                if (!vehicles.Any())
+                {
+                    return NotFound($"No vehicles found for customer ID {customerId}");
+                }
                 return Ok(vehicles);
             }
             catch(UnauthorizedException ex)
