@@ -2,6 +2,7 @@
 using hoistmt.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using hoistmt.Interfaces;
 
 namespace hoistmt.Functions
 {

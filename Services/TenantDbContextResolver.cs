@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using hoistmt.Interfaces;
 
 
 namespace hoistmt.Services;
@@ -69,8 +70,3 @@ public class TenantDbContextResolver<TContext> : ITenantDbContextResolver<TConte
 
 }
 
-public interface ITenantDbContextResolver<TContext>
-{
-    Task<TContext> GetTenantDbContextAsync(string tenant = null);
-    Task<TContext> GetTenantLoginDbContextAsync(string companyid); // Add the parameter
-}

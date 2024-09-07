@@ -4,6 +4,7 @@ using hoistmt.Data;
 using hoistmt.Services;
 using hoistmt.Functions;
 using hoistmt.HttpClients;
+using hoistmt.Interfaces;
 using hoistmt.Services.Billing;
 using hoistmt.Services.lib;
 using StackExchange.Redis;
@@ -74,6 +75,7 @@ public class Startup
         services.AddScoped<AccountSubscription >();
         services.AddScoped<StripeService>();
         services.AddScoped<VehicleService>();
+        services.AddScoped<CustomerService>();
         services.AddSingleton<IConnectionMultiplexer>(provider =>
         {
             var configuration = ConfigurationOptions.Parse(Configuration.GetConnectionString("RedisConnection"), true);

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using hoistmt.Data;
+using hoistmt.Interfaces;
 using hoistmt.Models;
 using Microsoft.EntityFrameworkCore;
 using hoistmt.Services;

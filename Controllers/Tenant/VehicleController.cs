@@ -4,7 +4,8 @@ using hoistmt.Services;
 using hoistmt.Services.lib;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using hoistmt.Exceptions;
+using hoistmt.Interfaces;
 
 namespace hoistmt.Controllers
 {
@@ -104,22 +105,16 @@ namespace hoistmt.Controllers
         {
             try
             {
-                var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-                if (dbContext == null)
-                {
-                    return Unauthorized("Invalid session");
-                }
-
-                var vehicle = await dbContext.vehicles.FindAsync(vehicleId);
-                if (vehicle == null)
-                {
-                    return NotFound(); // Vehicle with the specified ID not found
-                }
-
-                dbContext.vehicles.Remove(vehicle);
-                await dbContext.SaveChangesAsync();
-
+                var vehicle = await _vehicleService.DeleteVehicle(vehicleId);
                 return Ok("Vehicle deleted successfully");
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
@@ -132,46 +127,23 @@ namespace hoistmt.Controllers
         {
             try
             {
-                var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-                if (dbContext == null)
-                {
-                    return Unauthorized("Invalid session");
-                }
-
-                var existingVehicle = await dbContext.vehicles.FindAsync(vehicle.id);
-                
-                if (existingVehicle == null)
-                {
-                    return NotFound(); // Vehicle with the specified ID not found
-                }
-
-                existingVehicle.make = vehicle.make;
-                existingVehicle.model = vehicle.model;
-                existingVehicle.year = vehicle.year;
-                existingVehicle.customerid = vehicle.customerid;
-                existingVehicle.description = vehicle.description;
-
-                // Check if customer ID is provided
-                if (vehicle.customerid != null)
-                {
-                    // Find the corresponding customer
-                    var existingCustomer = await dbContext.customers.FindAsync(vehicle.customerid);
-                    if (existingCustomer == null)
-                    {
-                        return NotFound("Customer with the specified ID not found");
-                    }
-
-                    // Update the owner field of the vehicle with customer's first name and last name
-                    existingVehicle.owner = existingCustomer.FirstName + " " + existingCustomer.LastName;
-                }
-    
-                await dbContext.SaveChangesAsync();
+                var updateVehicle = await _vehicleService.UpdateVehicle(vehicle);
                 return Ok("Vehicle updated successfully!");
+
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, "Internal Server Error: " + ex.Message);
             }
+           
         }
         
     }

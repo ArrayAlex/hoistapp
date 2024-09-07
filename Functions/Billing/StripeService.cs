@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using hoistmt.Models.MasterDbModels.Stripe;
 using hoistmt.Data;
+using hoistmt.Interfaces;
 using hoistmt.Services;
 using Microsoft.EntityFrameworkCore;
 

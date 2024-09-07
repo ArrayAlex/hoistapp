@@ -4,6 +4,7 @@ using hoistmt.Functions;
 using Microsoft.Extensions.Configuration;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
+using hoistmt.Interfaces;
 
 namespace hoistmt.Controllers
 {

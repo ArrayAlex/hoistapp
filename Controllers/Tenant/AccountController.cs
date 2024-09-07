@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 using System.Threading.Tasks;
 using hoistmt.Functions;
+using hoistmt.Interfaces;
 using hoistmt.Models.Account;
 
 

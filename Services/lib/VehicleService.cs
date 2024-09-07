@@ -1,27 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using hoistmt.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using hoistmt.Models;
-
+using SendGrid.Helpers.Errors.Model;
 
 namespace hoistmt.Services.lib
 {
-    public class UnauthorizedException : Exception
-    {
-        public UnauthorizedException(string message) : base(message) { }
-    }
-
-    public class NotFound : Exception
-    {
-        public NotFound(string message) : base(message) { }
-    }
-    
-    public interface IVehicleService
-    {
-        Task<IEnumerable<Vehicle>> GetVehiclesAsync();
-    }
-
     public class VehicleService : IVehicleService, IDisposable
     {
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
@@ -69,6 +55,49 @@ namespace hoistmt.Services.lib
         {
             await EnsureContextInitializedAsync();
             return await _context.vehicles.Where(v => v.customerid == customerId).ToListAsync();
+        }
+        
+        public async Task<Vehicle> DeleteVehicle(int vehicleId)
+        {
+            await EnsureContextInitializedAsync();
+            var vehicle = await _context.vehicles.FindAsync(vehicleId);
+            if (vehicle == null)
+            {
+                throw new NotFoundException("Vehicle not found.");
+            }
+            _context.vehicles.Remove(vehicle);
+            await _context.SaveChangesAsync();
+            return vehicle;
+        }
+
+        public async Task<Vehicle> UpdateVehicle(Vehicle vehicle)
+        {
+            await EnsureContextInitializedAsync();
+            var existingVehicle = await _context.vehicles.FindAsync(vehicle.id);
+            if (existingVehicle == null)
+            {
+                throw new NotFoundException("Vehicle not found"); // Vehicle with the specified ID not found
+            }
+            existingVehicle.make = vehicle.make;
+            existingVehicle.model = vehicle.model;
+            existingVehicle.year = vehicle.year;
+            existingVehicle.customerid = vehicle.customerid;
+            existingVehicle.description = vehicle.description;
+            
+            /*if (vehicle.customerid != null)
+            {
+                // Find the corresponding customer
+                var existingCustomer = await dbContext.customers.FindAsync(vehicle.customerid);
+                if (existingCustomer == null)
+                {
+                    return NotFound("Customer with the specified ID not found");
+                }
+
+                // Update the owner field of the vehicle with customer's first name and last name
+                existingVehicle.owner = existingCustomer.FirstName + " " + existingCustomer.LastName;
+            }*/
+            await _context.SaveChangesAsync();
+            return vehicle;
         }
 
         public void Dispose()
