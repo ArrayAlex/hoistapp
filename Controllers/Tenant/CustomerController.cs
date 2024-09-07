@@ -13,12 +13,11 @@ namespace hoistmt.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
+      
         private CustomerService _customerSevice;
 
-        public CustomerController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, CustomerService customerService)
+        public CustomerController(CustomerService customerService)
         {
-            _tenantDbContextResolver = tenantDbContextResolver;
             _customerSevice = customerService;
         }
 

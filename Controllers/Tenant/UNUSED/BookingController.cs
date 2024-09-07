@@ -19,7 +19,6 @@ namespace hoistmt.Controllers
             _tenantDbContextResolver = tenantDbContextResolver;
         }
 
-        // GET: api/Booking
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
         {
@@ -31,7 +30,6 @@ namespace hoistmt.Controllers
             return await context.Bookings.ToListAsync();
         }
 
-        // GET: api/Booking/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBookingDetails(int id)
         {
@@ -46,7 +44,6 @@ namespace hoistmt.Controllers
             return Ok(booking);
         }
 
-        // POST: api/Booking
         [HttpPost]
         public async Task<IActionResult> AddBooking([FromBody] Booking booking)
         {
@@ -57,7 +54,6 @@ namespace hoistmt.Controllers
             return CreatedAtAction(nameof(GetBookingDetails), new { id = booking.Id }, booking);
         }
 
-        // PUT: api/Booking
         [HttpPut]
         public async Task<IActionResult> UpdateBooking([FromBody] Booking booking)
         {
@@ -68,7 +64,6 @@ namespace hoistmt.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Booking/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBooking(int id)
         {

@@ -5,7 +5,6 @@ using hoistmt.Services;
 using hoistmt.Functions;
 using hoistmt.HttpClients;
 using hoistmt.Interfaces;
-using hoistmt.Services.Billing;
 using hoistmt.Services.lib;
 using StackExchange.Redis;
 
@@ -76,6 +75,7 @@ public class Startup
         services.AddScoped<StripeService>();
         services.AddScoped<VehicleService>();
         services.AddScoped<CustomerService>();
+        services.AddScoped<AuthService>();
         services.AddSingleton<IConnectionMultiplexer>(provider =>
         {
             var configuration = ConfigurationOptions.Parse(Configuration.GetConnectionString("RedisConnection"), true);
@@ -88,15 +88,15 @@ public class Startup
             return new JwtService(secretKey, issuer);
         });
 
-        services.AddTransient<DatabaseInitializer>();
+        // services.AddTransient<DatabaseInitializer>();
 
         // Register background services
         // services.AddHostedService<GenerateInvoiceService>();
         // services.AddHostedService<ChargeInvoiceService>();
-        services.AddHostedService<DatabaseKeepAliveService>();
+        // services.AddHostedService<DatabaseKeepAliveService>();
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseInitializer dbInitializer)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         if (env.IsDevelopment())
         {
@@ -141,8 +141,8 @@ public class Startup
                 pattern: "{controller=Home}/{action=Index}/{id?}");
         });
 
-        var task = dbInitializer.InitializeAsync();
-        task.Wait();
+        // var task = dbInitializer.InitializeAsync();
+        // task.Wait();
     }
 }
 
