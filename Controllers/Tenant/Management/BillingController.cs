@@ -9,8 +9,11 @@ using hoistmt.Data;
 using hoistmt.Models.MasterDbModels;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using hoistmt.Exceptions;
 using hoistmt.Interfaces;
 using hoistmt.Models.Billing;
+using hoistmt.Services.lib;
+using Exception = System.Exception;
 
 namespace hoistmt.Controllers
 {
@@ -18,94 +21,87 @@ namespace hoistmt.Controllers
     [Route("api/[controller]")]
     public class BillingController : ControllerBase
     {
-        private readonly MasterDbContext _context;
-        private readonly StripeService _stripeService;
-        private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
+        private BillingService _billingService;
 
-        public BillingController(StripeService stripeService, ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, MasterDbContext context)
+        public BillingController(BillingService billingService)
         {
-            _stripeService = stripeService;
-            _tenantDbContextResolver = tenantDbContextResolver;
-            _context = context;
+            _billingService = billingService;
         }
 
         [HttpPost("create-customer")]
         public async Task<IActionResult> CreateCustomer([FromBody] CreateCustomerRequest request)
         {
-            var customer = await _stripeService.CreateCustomerAsync(request.Email, request.PaymentMethodId);
-            return Ok(customer);
-        }
-        
-        [HttpPost("payBill")]
-        public async Task<IActionResult> PayBill([FromBody] PayBillRequest request)
-        {
-            // Retrieve tenant-specific database context
-            var tenantDbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-            if (tenantDbContext == null)
-            {
-                return NotFound("Tenant DbContext not available.");
-            }
-
-            // Fetch the invoice from the master database
-            var invoice = await _context.companyinvoices.FirstOrDefaultAsync(i => i.InvoiceID == request.InvoiceID);
-            if (invoice == null)
-            {
-                return NotFound("Invoice not found.");
-            }
-
-            // Determine the payment method to use
-            PaymentGateway paymentMethod;
-            if (string.IsNullOrEmpty(request.MethodID))
-            {
-                // Use the default payment method
-                paymentMethod = await tenantDbContext.paymentgateway.FirstOrDefaultAsync(pm => pm.Active && pm.Default);
-            }
-            else
-            {
-                // Use the specified payment method
-                paymentMethod = await tenantDbContext.paymentgateway.FirstOrDefaultAsync(pm => pm.MethodId == request.MethodID && pm.Active);
-            }
-
-            if (paymentMethod == null)
-            {
-                return NotFound("Payment method not available.");
-            }
-
             try
             {
-                // Charge the card
-                var charge = await _stripeService.CreatePaymentIntentAsync(paymentMethod.CustomerId, invoice.Amount, paymentMethod.MethodId);
-                return Ok(new { Message = "Bill paid successfully" });
+                var customer = await _billingService.CreateCustomer(request);
+                return Ok(customer);
             }
             catch (StripeException e)
             {
                 return BadRequest(new { error = e.Message });
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+        }
+
+        [HttpPost("payBill")]
+        public async Task<IActionResult> PayBill([FromBody] PayBillRequest request)
+        {
+            try
+            {
+                var payBill = await _billingService.PayBill(request);
+                return Ok(payBill);
+            }
+            catch (UnauthorizedException e)
+            {
+                return Unauthorized(e.Message);
+            }
+            catch (StripeException e)
+            {
+                return BadRequest("");
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return BadRequest("bad request");
             }
         }
 
         [HttpPost("create-subscription")]
         public async Task<IActionResult> CreateSubscription([FromBody] CreateSubscriptionRequest request)
         {
-            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-            if (dbContext == null)
+            try
             {
-                return NotFound("Tenant DbContext not available for the retrieved database.");
+                var createSubscription = await _billingService.CreateSubscription(request);
+                return Ok(createSubscription);
             }
-            var subscription = await _stripeService.CreateSubscriptionAsync(request.CustomerId, request.PriceId);
-            return Ok(subscription);
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
-        
+
         [HttpPost("deletePaymentMethod")]
         public async Task<IActionResult> DeletePaymentMethod([FromBody] DeletePaymentMethodRequest request)
         {
             try
             {
-                await _stripeService.DeletePaymentMethodAsync(request.PaymentGatewayId);
-                return Ok(new { Message = "Payment method deleted successfully" });
+                var deletePaymentMethod = await _billingService.DeletePaymentMethod(request);
+                return Ok();
             }
-            catch (ApplicationException ex)
+            catch (ApplicationException e)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest("error");
+            }
+            catch (Exception e)
+            {
+                return BadRequest("error");
             }
         }
 
@@ -114,162 +110,105 @@ namespace hoistmt.Controllers
         {
             try
             {
-                var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-                if (dbContext == null)
-                {
-                    return NotFound("Tenant DbContext not available for the retrieved database.");
-                }
-
-                var customer = await _stripeService.CreateCustomerAsync(request.Email, request.PaymentMethodId);
-                var paymentMethod = await _stripeService.GetPaymentMethodAsync(request.PaymentMethodId);
-
-                // Save payment method details to the database
-                var paymentGateway = new PaymentGateway
-                {
-                    MethodId = paymentMethod.Id,
-                    Card = paymentMethod.Card.Last4,
-                    Active = true,
-                    CustomerId = customer.Id,
-                    Brand = paymentMethod.Card.Brand,
-                    Last4 = paymentMethod.Card.Last4
-                };
-
-                dbContext.paymentgateway.Add(paymentGateway);
-                await dbContext.SaveChangesAsync();
-
-                return Ok(new 
-                {
-                    CustomerId = customer.Id,
-                    PaymentMethodId = paymentMethod.Id,
-                    paymentMethod.Card.Last4,
-                    paymentMethod.Card.Brand
-                });
+                var addPaymentMethod = await _billingService.AddPaymentMethod(request);
+                return Ok(addPaymentMethod);
             }
             catch (StripeException e)
             {
-                return BadRequest(new { error = e.Message });
+                return BadRequest("error");
+            }
+            catch (Exception e)
+            {
+                return BadRequest("error");
             }
         }
 
         [HttpGet("payment-methods")]
         public async Task<IActionResult> GetPaymentMethods()
         {
-            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-            if (dbContext == null)
+            try
             {
-                return NotFound("Tenant DbContext not available for the retrieved database.");
+                var paymentMethods = await _billingService.GetPaymentMethods();
+                return Ok(paymentMethods);
             }
-
-            var paymentMethods = await dbContext.paymentgateway
-                .Where(pg => pg.Active)
-                .Select(pg => new 
-                {
-                    pg.MethodId,
-                    pg.Card,
-                    pg.Brand,
-                    pg.Last4,
-                    pg.Id,
-                    pg.Default
-                })
-                .ToListAsync();
-
-            return Ok(paymentMethods);
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (UnauthorizedException e)
+            {
+                return Unauthorized(e.Message);
+            }
+            catch (Exception e)
+            {
+                return BadRequest("error");
+            }
         }
-        
+
         [HttpPost("set-default-payment-method")]
         public async Task<IActionResult> SetDefaultPaymentMethod([FromBody] SetDefaultPaymentMethodRequest request)
         {
-            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-            if (dbContext == null)
+            try
             {
-                return NotFound("Tenant DbContext not available for the retrieved database.");
+                var setDefaultPaymentMethod = await _billingService.SetDefaultPaymentMethod(request);
+                return Ok(setDefaultPaymentMethod);
             }
-
-            // Reset the default flag for all payment methods
-            var paymentMethods = await dbContext.paymentgateway.ToListAsync();
-            foreach (var method in paymentMethods)
+            catch (NotFoundException e)
             {
-                method.Default = false;
+                return NotFound("Payment method not found");
             }
-
-            // Set the selected payment method as default
-            var paymentMethod = await dbContext.paymentgateway.FirstOrDefaultAsync(pm => pm.MethodId == request.MethodId);
-            if (paymentMethod == null)
+            catch (UnauthorizedException e)
             {
-                return NotFound("Payment method not found.");
+                return Unauthorized(e.Message);
             }
-
-            paymentMethod.Default = true;
-            await dbContext.SaveChangesAsync();
-
-            return Ok(new { Message = "Default payment method updated successfully" });
+            catch (Exception e)
+            {
+                return BadRequest("error");
+            }
         }
 
         [HttpGet("billing-info")]
         public async Task<IActionResult> getBillingInfo()
         {
-            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-            if (dbContext == null)
+            try
             {
-                return NotFound("Tenant DbContext not available for the retrieved database.");
+                var billinginfo = await _billingService.GetBillingInfo();
+                return Ok(billinginfo);
             }
-
-            var billingInfo = await dbContext.company.AsNoTracking().ToListAsync();        
-
-            return Ok(billingInfo);
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (UnauthorizedException e)
+            {
+                return Unauthorized(e.Message);
+            }
+            catch (Exception e)
+            {
+                return BadRequest("error");
+            }
         }
 
         [HttpPut("update-billing-info")]
-        public async Task<IActionResult> updateBillingInfo([FromBody] AccountBillingInfo request){
-            var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
-            if (dbContext == null)
+        public async Task<IActionResult> UpdateBillingInfo([FromBody] AccountBillingInfo request)
+        {
+            try
             {
-                return NotFound("Tenant DbContext not available for the retrieved database.");
+                var updateBillingInfo = await _billingService.UpdateBillingInfo(request);
+                return Ok(updateBillingInfo);
             }
-
-            var billingInfo = await dbContext.company.FirstOrDefaultAsync();
-            if (billingInfo == null)
+            catch (NotFoundException e)
             {
-                return NotFound("Billing info not found.");
+                return NotFound(e.Message);
             }
-
-            billingInfo.BusinessName = request.BusinessName;
-            billingInfo.AddressLine1 = request.AddressLine1;
-            billingInfo.City = request.City;
-            billingInfo.Country = request.Country;
-
-            await dbContext.SaveChangesAsync();
-
-            return Ok(new { Message = "Billing info updated successfully" });
+            catch (UnauthorizedException e)
+            {
+                return Unauthorized(e.Message);
+            }
+            catch (Exception e)
+            {
+                return BadRequest("error");
+            }
         }
-        
-    }
-    
-    public class SetDefaultPaymentMethodRequest
-    {
-        public string MethodId { get; set; }
-    }
-
-    public class CreateCustomerRequest
-    {
-        public string Email { get; set; }
-        public string PaymentMethodId { get; set; }
-    }
-
-    public class CreateSubscriptionRequest
-    {
-        public string CustomerId { get; set; }
-        public string PriceId { get; set; }
-    }
-
-    public class AddPaymentMethodRequest
-    {
-        public string Email { get; set; }
-        public string PaymentMethodId { get; set; }
-    }
-
-    public class DeletePaymentMethodRequest
-    {
-        public int PaymentGatewayId { get; set; }
     }
 }
