@@ -11,6 +11,6 @@ public class Companies
     public string PlanName { get; set; }
     public int PlanID { get; set; }
     public DateTime? PrevBilling { get; set; }
-    public DateTime NextBilling { get; set; }
+    public DateTime? NextBilling { get; set; }
     
 }

@@ -26,7 +26,7 @@ public class Startup
             options.AddPolicy(name: "_HoistNZ",
                 policy =>
                 {
-                    policy.WithOrigins("https://hoist.nz", "http://localhost:5173")
+                    policy.WithOrigins("https://hoist.nz", "http://localhost:3000")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
@@ -73,7 +73,7 @@ public class Startup
         services.AddScoped<EmailService>();
         services.AddScoped<AccountSubscription >();
         services.AddScoped<StripeService>();
-        services.AddScoped<VehicleService>();
+        services.AddScoped<IVehicleService, VehicleService>();
         services.AddScoped<CustomerService>();
         services.AddScoped<AuthService>();
         services.AddSingleton<IConnectionMultiplexer>(provider =>
@@ -112,21 +112,25 @@ public class Startup
         app.UseRouting();
         app.UseCors("_HoistNZ");
 
-        app.Use(async (context, next) =>
-        {
-            if (context.Request.Method == "OPTIONS")
-            {
-                context.Response.Headers.Append("Access-Control-Allow-Origin", "https://hoist.nz");
-                context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-                context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type, Authorization");
-                context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
-                await context.Response.CompleteAsync();
-            }
-            else
-            {
-                await next();
-            }
-        });
+        // app.Use(async (context, next) =>
+        // {
+        //     var origin = context.Request.Headers["Origin"].ToString();
+        //     if (context.Request.Method == "OPTIONS")
+        //     {
+        //         if (origin == "https://hoist.nz" || origin == "http://localhost:3000")
+        //         {
+        //             context.Response.Headers.Append("Access-Control-Allow-Origin", origin);
+        //         }
+        //         context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+        //         context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        //         context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+        //         await context.Response.CompleteAsync();
+        //     }
+        //     else
+        //     {
+        //         await next();
+        //     }
+        // });
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();

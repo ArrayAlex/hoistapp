@@ -8,6 +8,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using hoistmt.Interfaces;
+using hoistmt.Models.MasterDbModels;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace hoistmt.Services
@@ -17,12 +18,15 @@ namespace hoistmt.Services
         private readonly MasterDbContext _context;
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
         private readonly EmailService _emailService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public TenantService(MasterDbContext context, ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, EmailService emailService)
+        public TenantService(MasterDbContext context, ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, EmailService emailService,IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _tenantDbContextResolver = tenantDbContextResolver;
             _emailService = emailService;
+            _httpContextAccessor = httpContextAccessor;
+            
         }
 
         public async Task<DbTenant> CreateTenant(newUser newUser)
@@ -93,6 +97,27 @@ namespace hoistmt.Services
             var message = $"Please verify your email by clicking <a href='{verificationUrl}'>here</a>.";
             await _emailService.SendEmailAsync(user.email, "Email Verification", message);
 
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null)
+            {
+                httpContext.Session.SetInt32("userid", dbTenant.Id);
+                httpContext.Session.SetString("sessionid", httpContext.Session.Id);
+                httpContext.Session.SetString("CompanyDb", dbTenant.DatabaseName);
+            }
+            else
+            {
+                throw new InvalidOperationException("HttpContext is not available.");
+            }
+            
+            var company = new Companies
+            {
+                CompanyID = dbTenant.DatabaseName,
+                Credits = 0,
+                PlanName = "None",
+                PlanID = 1
+            };
+            var companiesMaster = _context.Companies.Add(company);
+            await _context.SaveChangesAsync();
             return dbTenant;
         }
 

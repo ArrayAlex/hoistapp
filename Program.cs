@@ -4,7 +4,9 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        Console.WriteLine("started ");
         CreateHostBuilder(args).Build().Run();
+        
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -15,4 +17,5 @@ public class Program
 
                 webBuilder.UseUrls("http://0.0.0.0:80");
             });
+        
 }

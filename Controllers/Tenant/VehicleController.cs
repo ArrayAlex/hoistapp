@@ -14,7 +14,7 @@ namespace hoistmt.Controllers
     public class VehicleController : ControllerBase
     {
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
-        private VehicleService _vehicleService;
+        private readonly IVehicleService  _vehicleService;
         public VehicleController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, VehicleService vehicleService)
         {
             _tenantDbContextResolver = tenantDbContextResolver;
@@ -76,28 +76,28 @@ namespace hoistmt.Controllers
             }
         }
 
-        [HttpGet("vehicles/customer/{customerId}")]
-        public async Task<IActionResult> GetVehiclesByCustomerId(int customerId)
-        {
-            try
-            {
-                var vehicles = await _vehicleService.GetVehiclesByCustomerId(customerId);
-                if (!vehicles.Any())
-                {
-                    return NotFound($"No vehicles found for customer ID {customerId}");
-                }
-                return Ok(vehicles);
-            }
-            catch(UnauthorizedException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "An error occurred while processing your request.");
-            }
-            
-        }
+        // [HttpGet("vehicles/customer/{customerId}")]
+        // public async Task<IActionResult> GetVehiclesByCustomerId(int customerId)
+        // {
+        //     try
+        //     {
+        //         var vehicles = await _vehicleService.GetVehiclesByCustomerId(customerId);
+        //         if (!vehicles.Any())
+        //         {
+        //             return NotFound($"No vehicles found for customer ID {customerId}");
+        //         }
+        //         return Ok(vehicles);
+        //     }
+        //     catch(UnauthorizedException ex)
+        //     {
+        //         return Unauthorized(ex.Message);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, "An error occurred while processing your request.");
+        //     }
+        //     
+        // }
 
         
         [HttpDelete("delete/{vehicleId}")] // Corrected endpoint definition
