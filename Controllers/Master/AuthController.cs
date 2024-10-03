@@ -39,7 +39,7 @@ namespace hoistmt.Controllers
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.WriteLine($"Error during login: {ex.Message}");
-                return StatusCode(500, "An error occurred during login");
+                return StatusCode(500, ex.Message);
             }
         }
 

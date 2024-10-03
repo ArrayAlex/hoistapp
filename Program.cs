@@ -4,9 +4,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        Console.WriteLine("started ");
         CreateHostBuilder(args).Build().Run();
-        
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
