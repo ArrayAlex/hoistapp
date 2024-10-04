@@ -25,7 +25,9 @@ namespace hoistmt.Controllers
         {
             try
             {
+                Console.WriteLine(model);
                 var result = await _authService.Login(model);
+                Console.WriteLine(result);
                 return Ok(result);
             }
             catch (InvalidRequest ex)

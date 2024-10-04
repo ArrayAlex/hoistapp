@@ -10,7 +10,7 @@ namespace hoistmt.Services.lib;
 public class AuthService : IDisposable
 {
     private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
-    private readonly MasterDbContext _masterDbContext; 
+    private readonly MasterDbContext _masterDbContext;
     private readonly IConfiguration _configuration;
     private readonly JwtService _jwtService;
     private readonly TokenHandler _tokenHandler;
@@ -18,7 +18,9 @@ public class AuthService : IDisposable
     private bool _disposed = false;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AuthService(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, MasterDbContext masterDbContext,IConfiguration configuration, JwtService jwtService, TokenHandler tokenHandler,IHttpContextAccessor httpContextAccessor)
+    public AuthService(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver,
+        MasterDbContext masterDbContext, IConfiguration configuration, JwtService jwtService, TokenHandler tokenHandler,
+        IHttpContextAccessor httpContextAccessor)
     {
         _tenantDbContextResolver = tenantDbContextResolver;
         _configuration = configuration;
@@ -35,37 +37,44 @@ public class AuthService : IDisposable
         await EnsureCompanyContextInitializedAsync(login.Company);
         if (string.IsNullOrEmpty(login.Company) || string.IsNullOrEmpty(login.Password) ||
             string.IsNullOrEmpty(login.Username))
-        {   
+        {
             throw new InvalidRequest("Invalid login credentials");
         }
-        
+
         var account = await _context.Set<UserAccount>()
-            .FirstOrDefaultAsync(a => a.Username == login.Username && a.Password == login.Password && a.IsVerified == true);
-        
-        var httpContext = _httpContextAccessor.HttpContext;
-        if (httpContext != null)
+            .FirstOrDefaultAsync(a =>
+                a.Username == login.Username && a.Password == login.Password && a.IsVerified == true);
+
+        if (account == null)
         {
-            httpContext.Session.SetInt32("userid", account.Id);
-            httpContext.Session.SetString("sessionid", httpContext.Session.Id);
-            httpContext.Session.SetString("CompanyDb", login.Company);
+            throw new InvalidRequest("Invalid username or password");
         }
-        else
+
+        var httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext == null)
         {
             throw new InvalidOperationException("HttpContext is not available.");
         }
-        
+
+        // Set session variables safely
+        httpContext.Session.SetInt32("userid", account.Id);
+        httpContext.Session.SetString("sessionid", httpContext.Session.Id);
+        httpContext.Session.SetString("CompanyDb", login.Company);
+
         var company = await _masterDbContext.Companies.FirstOrDefaultAsync(c => c.CompanyID == login.Company);
         if (company == null)
         {
             throw new NotFoundException("Company not found");
         }
-        
+
         var plan = await _masterDbContext.plansubscriptions.FirstOrDefaultAsync(p => p.id == company.PlanID);
         if (plan == null)
         {
             throw new NotFoundException("Plan not found");
         }
+
         
+
         httpContext.Session.SetInt32("PlanID", plan.id);
         httpContext.Session.SetString("PlanName", plan.PlanName);
         httpContext.Session.SetInt32("StorageLimitGB", plan.StorageLimitGB);
@@ -75,7 +84,7 @@ public class AuthService : IDisposable
         httpContext.Session.SetString("AccessFeatureC", plan.AccessFeatureC.ToString());
         httpContext.Session.SetString("AccessFeatureD", plan.AccessFeatureD.ToString());
         httpContext.Session.SetString("AccessFeatureE", plan.AccessFeatureE.ToString());
-        
+
         var session = new Session
         {
             userID = account.Id,
@@ -83,21 +92,14 @@ public class AuthService : IDisposable
             ipAddress = httpContext.Connection.RemoteIpAddress.ToString(),
             ExpiresAt = DateTime.UtcNow.AddHours(1),
             CompanyDb = httpContext.Session.GetString("CompanyDb")
-            // Add any other session properties you need
         };
-        
+
         _masterDbContext.sessions.Add(session);
         await _context.SaveChangesAsync();
-        System.Diagnostics.Trace.WriteLine("LOGIN SUCCESSFUL");
-        System.Diagnostics.Trace.WriteLine(httpContext.Session.Id);
-        Console.Write("PlaneName: ");
-        System.Diagnostics.Trace.WriteLine(httpContext.Session.GetString("PlanName"));
-        Console.Write("MaxUsers: ");
-        System.Diagnostics.Trace.WriteLine(httpContext.Session.GetInt32("MaxUsers"));
-
+        var newUser = await _masterDbContext.Companies.FirstOrDefaultAsync(c => c.CompanyID == login.Company);
         return new
         {
-            Token = httpContext.Session.Id,
+            newUser = newUser.New,
             Plan = new
             {
                 PlanID = plan.id,
@@ -111,10 +113,10 @@ public class AuthService : IDisposable
                 AccessFeatureD = plan.AccessFeatureD,
                 AccessFeatureE = plan.AccessFeatureE
             }
+            
         };
     }
-    
-    
+
     private async Task EnsureContextInitializedAsync()
     {
         if (_context == null)
@@ -126,7 +128,7 @@ public class AuthService : IDisposable
             }
         }
     }
-    
+
     private async Task EnsureCompanyContextInitializedAsync(string company)
     {
         if (_context == null)
@@ -138,14 +140,14 @@ public class AuthService : IDisposable
             }
         }
     }
-    
+
     public async Task<object> VerifyToken()
     {
         if (_httpContextAccessor.HttpContext.Session.GetString("CompanyDb") == null)
         {
             throw new UnauthorizedException("Not logged in or unauthorized access.");
         }
-        
+
         return new
         {
             Token = _httpContextAccessor.HttpContext.Session.Id,
@@ -163,7 +165,7 @@ public class AuthService : IDisposable
             }
         };
     }
-    
+
     public async Task<object> Logout()
     {
         try
@@ -178,6 +180,7 @@ public class AuthService : IDisposable
                 _masterDbContext.sessions.Remove(session);
                 await _masterDbContext.SaveChangesAsync();
             }
+
             return new
             {
                 Message = "Logout successful"
@@ -192,8 +195,8 @@ public class AuthService : IDisposable
             };
         }
     }
-    
-    
+
+
     public void Dispose()
     {
         Dispose(true);

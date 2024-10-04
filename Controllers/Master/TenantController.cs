@@ -4,6 +4,7 @@ using hoistmt.Models;
 using hoistmt.Services;
 using System;
 using System.Threading.Tasks;
+using hoistmt.Exceptions;
 using hoistmt.Models.httpModels;
 
 namespace hoistmt.Controllers
@@ -122,6 +123,23 @@ p {{{{ font-size: 1.1em; color: #333; }}}}
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("removenewtag")]
+        public async Task<IActionResult> RemoveNewUserTag()
+        {
+            try
+            {
+                await _tenantService.RemoveNewTag();
+                return Ok(true);
+            }
+            catch (UnauthorizedException e)
+            {
+                return Unauthorized(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "");
             }
         }
     }

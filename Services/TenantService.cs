@@ -7,9 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using hoistmt.Exceptions;
 using hoistmt.Interfaces;
 using hoistmt.Models.MasterDbModels;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace hoistmt.Services
 {
@@ -201,6 +203,35 @@ namespace hoistmt.Services
             tenant.ResetTokenExpiry = null;
 
             await dbContext.SaveChangesAsync();
+            
+        }
+
+        public async Task<bool> RemoveNewTag()
+        {
+            
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null)
+            {
+                
+                var companyID = httpContext.Session.GetString("CompanyDb");
+                var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync(companyID);
+                if (dbContext == null)
+                {
+                    throw new UnauthorizedException("just no.");
+                }
+                var company = await _context.Companies.FirstOrDefaultAsync(c => c.CompanyID == companyID);
+
+                if (company != null)
+                {
+                    company.New = false;
+                    _context.Companies.Update(company);
+                    _context.SaveChangesAsync();
+
+                    return true;
+                }
+            }
+            
+            return false;
             
         }
     }

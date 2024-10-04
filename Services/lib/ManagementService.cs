@@ -17,8 +17,6 @@ public class ManagementService : IDisposable
         _context = context;
     }
     
-    
-    
     private async Task EnsureContextInitializedAsync()
     {
         if (_context == null)
