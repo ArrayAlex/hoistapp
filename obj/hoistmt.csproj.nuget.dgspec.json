@@ -1,25 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\alex\\RiderProjects\\hoistapp45\\hoistmt.csproj": {}
+    "C:\\Users\\Nulle\\hoistapp-2\\hoistmt.csproj": {}
   },
   "projects": {
-    "C:\\Users\\alex\\RiderProjects\\hoistapp45\\hoistmt.csproj": {
+    "C:\\Users\\Nulle\\hoistapp-2\\hoistmt.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\alex\\RiderProjects\\hoistapp45\\hoistmt.csproj",
+        "projectUniqueName": "C:\\Users\\Nulle\\hoistapp-2\\hoistmt.csproj",
         "projectName": "hoistmt",
-        "projectPath": "C:\\Users\\alex\\RiderProjects\\hoistapp45\\hoistmt.csproj",
-        "packagesPath": "C:\\Users\\alex\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\alex\\RiderProjects\\hoistapp45\\obj\\",
+        "projectPath": "C:\\Users\\Nulle\\hoistapp-2\\hoistmt.csproj",
+        "packagesPath": "C:\\Users\\Nulle\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Nulle\\hoistapp-2\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\alex\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Nulle\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -32,6 +33,11 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -86,6 +92,24 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.5, 8.0.5]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[8.0.5, 8.0.5]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.5, 8.0.5]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.5, 8.0.5]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -94,7 +118,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Users\\alex\\.dotnet\\sdk\\8.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100-preview.5.24307.3/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

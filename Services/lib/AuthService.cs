@@ -97,6 +97,8 @@ public class AuthService : IDisposable
         _masterDbContext.sessions.Add(session);
         await _context.SaveChangesAsync();
         var newUser = await _masterDbContext.Companies.FirstOrDefaultAsync(c => c.CompanyID == login.Company);
+        
+       
         return new
         {
             newUser = newUser.New,

@@ -46,53 +46,5 @@ namespace hoistmt.Controllers
             return Ok(hasCredits);
         }
 
-        [HttpGet("connection-string")]
-        public IActionResult GetConnectionString()
-        {
-            string connectionString;
-            if (string.IsNullOrEmpty(_configuration["COOKIE_DOMAIN"]))
-            {
-                connectionString = _configuration.GetConnectionString("masterConnectionLocal");
-            }
-            else
-            {
-                connectionString = _configuration.GetConnectionString("masterConnectionRemote");
-            }
-
-            return Ok(new { ConnectionString = connectionString });
-        }
-
-        [HttpGet("ping")]
-        public async Task<IActionResult> PingAddresses()
-        {
-            var pingResults = new List<object>();
-
-            string[] ipAddresses = { "10.0.0.10", "10.0.0.11" };
-            foreach (var ipAddress in ipAddresses)
-            {
-                var ping = new Ping();
-                try
-                {
-                    var reply = await ping.SendPingAsync(ipAddress);
-                    pingResults.Add(new
-                    {
-                        Address = ipAddress,
-                        Status = reply.Status.ToString(),
-                        RoundtripTime = reply.RoundtripTime
-                    });
-                }
-                catch (PingException ex)
-                {
-                    pingResults.Add(new
-                    {
-                        Address = ipAddress,
-                        Status = "Error",
-                        ErrorMessage = ex.Message
-                    });
-                }
-            }
-
-            return Ok(pingResults);
-        }
     }
 }
