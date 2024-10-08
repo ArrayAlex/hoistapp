@@ -97,10 +97,11 @@ public class AuthService : IDisposable
         _masterDbContext.sessions.Add(session);
         await _context.SaveChangesAsync();
         var newUser = await _masterDbContext.Companies.FirstOrDefaultAsync(c => c.CompanyID == login.Company);
-        
+        var accountUser = await _context.accounts.FirstOrDefaultAsync(u => u.Id == session.userID);
        
         return new
         {
+            success = true,
             newUser = newUser.New,
             Plan = new
             {
@@ -114,6 +115,12 @@ public class AuthService : IDisposable
                 AccessFeatureC = plan.AccessFeatureC,
                 AccessFeatureD = plan.AccessFeatureD,
                 AccessFeatureE = plan.AccessFeatureE
+            },
+            Account = new {
+                Name = accountUser.Name,
+                Email = accountUser.email,
+                Role = accountUser.position,
+                Phone = account.phone
             }
             
         };
