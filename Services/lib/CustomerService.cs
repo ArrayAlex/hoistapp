@@ -30,6 +30,31 @@ public class CustomerService : IDisposable
         }
     }
 
+    public async Task<IEnumerable<Customer>> SearchCustomers(string searchTerm)
+    {
+        await EnsureContextInitializedAsync();
+        
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return await GetCustomers();
+
+        var customers = await _context.customers
+            .Where(c => c.FirstName.ToLower().Contains(searchTerm.ToLower()) ||
+                        c.LastName.ToLower().Contains(searchTerm.ToLower()) ||
+                        c.Email.ToLower().Contains(searchTerm.ToLower()) ||
+                        c.Phone.Contains(searchTerm))
+            .ToListAsync();
+
+        System.Diagnostics.Debug.WriteLine($"Search term: {searchTerm}");
+        System.Diagnostics.Debug.WriteLine($"Customers found: {customers.Count}");
+
+        if (!customers.Any())
+        {
+            throw new NotFoundException($"No customers found matching '{searchTerm}'.");
+        }
+
+        return customers;
+    }
+
     public async Task<IEnumerable<Customer>> GetCustomers()
     {
         await EnsureContextInitializedAsync();

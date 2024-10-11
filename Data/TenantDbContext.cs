@@ -12,6 +12,7 @@ public class TenantDbContext : DbContext
     public TenantDbContext(DbContextOptions<TenantDbContext> options) : base(options) { }
 
     public DbSet<Vehicle> vehicles { get; set; }
+    public DbSet<Job> jobs { get; set; }
     public DbSet<Appointment> appointments { get; set; }
     //public DbSet<CompanInvoice> companyinvoices { get; set; }
     public DbSet<UserAccount> accounts { get; set; }

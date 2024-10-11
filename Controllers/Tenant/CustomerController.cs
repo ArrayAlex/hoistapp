@@ -66,6 +66,29 @@ namespace hoistmt.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<Customer>>> SearchCustomers([FromQuery] string searchTerm)
+        {
+            try
+            {
+                var customers = await _customerSevice.SearchCustomers(searchTerm);
+                return Ok(customers);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"Error searching Customers: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
         
         [HttpPut("update")]
         public async Task<IActionResult> UpdateCustomer([FromBody] Customer customer)

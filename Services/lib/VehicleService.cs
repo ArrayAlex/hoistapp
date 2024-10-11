@@ -70,6 +70,22 @@ namespace hoistmt.Services.lib
             return vehicle;
         }
 
+        public async Task<IEnumerable<Vehicle>> SearchVehicles(string searchTerm)
+        {
+            await EnsureContextInitializedAsync();
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return await GetVehiclesAsync();
+
+            return await _context.vehicles
+                .Where(v => v.make.ToLower().Contains(searchTerm.ToLower()) ||
+                            v.model.ToLower().Contains(searchTerm.ToLower()) ||
+                            v.rego.ToLower().Contains(searchTerm.ToLower()) ||
+                            v.year.ToString().Contains(searchTerm) ||
+                            v.description.ToLower().Contains(searchTerm.ToLower()))
+                .ToListAsync();
+        }
+
         public async Task<Vehicle> UpdateVehicle(Vehicle vehicle)
         {
             await EnsureContextInitializedAsync();

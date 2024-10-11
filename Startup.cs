@@ -7,6 +7,7 @@ using hoistmt.HttpClients;
 using hoistmt.Interfaces;
 using hoistmt.Services.lib;
 using StackExchange.Redis;
+using hoistmt.Models;
 
 namespace hoistmt;
 
@@ -70,6 +71,7 @@ public class Startup
         services.AddScoped<TenantService>();
         services.AddScoped<TokenHandler>();
         services.AddScoped<Credits>();
+        services.AddScoped<JobService>();
         services.AddScoped<EmailService>();
         services.AddScoped<AccountSubscription >();
         services.AddScoped<StripeService>();
@@ -112,25 +114,25 @@ public class Startup
         app.UseRouting();
         app.UseCors("_HoistNZ");
 
-        // app.Use(async (context, next) =>
-        // {
-        //     var origin = context.Request.Headers["Origin"].ToString();
-        //     if (context.Request.Method == "OPTIONS")
-        //     {
-        //         if (origin == "https://hoist.nz" || origin == "http://localhost:3000")
-        //         {
-        //             context.Response.Headers.Append("Access-Control-Allow-Origin", origin);
-        //         }
-        //         context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-        //         context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type, Authorization");
-        //         context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
-        //         await context.Response.CompleteAsync();
-        //     }
-        //     else
-        //     {
-        //         await next();
-        //     }
-        // });
+        app.Use(async (context, next) =>
+        {
+            var origin = context.Request.Headers["Origin"].ToString();
+            if (context.Request.Method == "OPTIONS")
+            {
+                if (origin == "https://hoist.nz" || origin == "http://localhost:3000")
+                {
+                    context.Response.Headers.Append("Access-Control-Allow-Origin", origin);
+                }
+                context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+                context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+                await context.Response.CompleteAsync();
+            }
+            else
+            {
+                await next();
+            }
+        });
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();

@@ -1,33 +1,35 @@
-﻿
-using hoistmt.Models;
+﻿using hoistmt.Models;
 using hoistmt.Services;
 using hoistmt.Services.lib;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hoistmt.Exceptions;
 using hoistmt.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace hoistmt.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class VehicleController : ControllerBase
+    public class JobController : ControllerBase
     {
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
-        private readonly IVehicleService  _vehicleService;
-        public VehicleController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, IVehicleService vehicleService)
+        private readonly JobService _jobService;
+
+        public JobController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, JobService jobService)
         {
             _tenantDbContextResolver = tenantDbContextResolver;
-            _vehicleService = vehicleService;
+            _jobService = jobService;
         }
         
-        [HttpGet("vehicles")]
-        public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
+        [HttpGet("jobs")]
+        public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
         {
             try
             {
-                var vehicles = await _vehicleService.GetVehiclesAsync();
-                return Ok(vehicles);
+                var jobs = await _jobService.GetJobsAsync();
+                return Ok(jobs);
             }
             catch (UnauthorizedException ex)
             {
@@ -41,12 +43,12 @@ namespace hoistmt.Controllers
         }
         
         [HttpPost("add")]
-        public async Task<IActionResult> AddVehicle([FromBody] Vehicle vehicle)
+        public async Task<IActionResult> AddJob([FromBody] Job job)
         {
             try
             {
-                var addedVehicle = await _vehicleService.AddVehicleAsync(vehicle);
-                return CreatedAtAction(nameof(GetVehicles), new { id = addedVehicle.id });
+                var addedJob = await _jobService.AddJobAsync(job);
+                return CreatedAtAction(nameof(GetJobDetails), new { id = addedJob.JobId }, addedJob);
             }
             catch (UnauthorizedException ex)
             {
@@ -58,13 +60,17 @@ namespace hoistmt.Controllers
             }
         }
         
-        [HttpGet("vehicle/{id}")]
-        public async Task<IActionResult> GetVehicleDetails(int id)
+        [HttpGet("job/{id}")]
+        public async Task<IActionResult> GetJobDetails(int id)
         {
             try
             {
-                var vehicle = await _vehicleService.GetVehicleDetails(id);
-                return Ok(vehicle);
+                var job = await _jobService.GetJobDetails(id);
+                if (job == null)
+                {
+                    return NotFound($"Job with ID {id} not found.");
+                }
+                return Ok(job);
             }
             catch (UnauthorizedException ex)
             {
@@ -76,14 +82,13 @@ namespace hoistmt.Controllers
             }
         }
 
-
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Vehicle>>> SearchVehicles([FromQuery] string searchTerm)
+        public async Task<ActionResult<IEnumerable<Job>>> SearchJobs([FromQuery] string searchTerm)
         {
             try
             {
-                var vehicles = await _vehicleService.SearchVehicles(searchTerm);
-                return Ok(vehicles);
+                var jobs = await _jobService.SearchJobs(searchTerm);
+                return Ok(jobs);
             }
             catch (UnauthorizedException ex)
             {
@@ -91,42 +96,40 @@ namespace hoistmt.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"Error searching Vehicles: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"Error searching Jobs: {ex.Message}");
                 return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // [HttpGet("vehicles/customer/{customerId}")]
-        // public async Task<IActionResult> GetVehiclesByCustomerId(int customerId)
-        // {
-        //     try
-        //     {
-        //         var vehicles = await _vehicleService.GetVehiclesByCustomerId(customerId);
-        //         if (!vehicles.Any())
-        //         {
-        //             return NotFound($"No vehicles found for customer ID {customerId}");
-        //         }
-        //         return Ok(vehicles);
-        //     }
-        //     catch(UnauthorizedException ex)
-        //     {
-        //         return Unauthorized(ex.Message);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, "An error occurred while processing your request.");
-        //     }
-        //     
-        // }
-
-        
-        [HttpDelete("delete/{vehicleId}")] // Corrected endpoint definition
-        public async Task<IActionResult> DeleteVehicle(int vehicleId)
+        [HttpGet("customer/{customerId}")]
+        public async Task<IActionResult> GetJobsByCustomerId(int customerId)
         {
             try
             {
-                var vehicle = await _vehicleService.DeleteVehicle(vehicleId);
-                return Ok("Vehicle deleted successfully");
+                var jobs = await _jobService.GetJobsByCustomerId(customerId);
+                if (!jobs.Any())
+                {
+                    return NotFound($"No jobs found for customer ID {customerId}");
+                }
+                return Ok(jobs);
+            }
+            catch(UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+        
+        [HttpDelete("delete/{jobId}")]
+        public async Task<IActionResult> DeleteJob(int jobId)
+        {
+            try
+            {
+                await _jobService.DeleteJob(jobId);
+                return Ok("Job deleted successfully");
             }
             catch (NotFoundException ex)
             {
@@ -143,13 +146,12 @@ namespace hoistmt.Controllers
         }
 
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateVehicle([FromBody] Vehicle vehicle)
+        public async Task<IActionResult> UpdateJob([FromBody] Job job)
         {
             try
             {
-                var updateVehicle = await _vehicleService.UpdateVehicle(vehicle);
-                return Ok("Vehicle updated successfully!");
-
+                var updatedJob = await _jobService.UpdateJob(job);
+                return Ok(updatedJob);
             }
             catch (UnauthorizedException ex)
             {
@@ -163,8 +165,6 @@ namespace hoistmt.Controllers
             {
                 return StatusCode(500, "Internal Server Error: " + ex.Message);
             }
-           
         }
-        
     }
 }
