@@ -44,6 +44,29 @@ namespace hoistmt.Controllers
             }
         }
 
+        [HttpGet("Customers/{id}")]
+        public async Task<ActionResult<Customer>> GetCustomerById(int id)
+        {
+            try
+            {
+                var customer = await _customerSevice.GetCustomerById(id);
+                return Ok(customer);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"Error fetching Customer by ID: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
         [HttpGet("Customers/ByVehicle")]
         public async Task<ActionResult<Customer>> GetCustomerByVehicleId([FromQuery] int vehicleId)
         {

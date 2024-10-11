@@ -67,6 +67,22 @@ public class CustomerService : IDisposable
         return customers;
     }
 
+    public async Task<Customer> GetCustomerById(int customerId)
+    {
+        await EnsureContextInitializedAsync();
+        
+        // Fetch the customer by ID
+        var customer = await _context.customers.FirstOrDefaultAsync(c => c.id == customerId);
+        
+        // If customer is not found, throw an exception
+        if (customer == null)
+        {
+            throw new NotFoundException($"Customer with ID {customerId} not found.");
+        }
+
+        return customer;
+    }
+
     public async Task<Customer> GetCustomerByVehicleId(int vehicleId)
     {
         await EnsureContextInitializedAsync();

@@ -23,5 +23,7 @@ public class UserAccount
     public string? VerificationToken { get; set; }
     public DateTime? VerificationTokenExpiry { get; set; }
     public bool? IsVerified { get; set; }
+
+    public bool? isTech { get; set; }
     
 }
