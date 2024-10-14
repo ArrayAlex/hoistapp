@@ -24,11 +24,11 @@ namespace hoistmt.Controllers
         }
         
         [HttpGet("jobs")]
-        public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
+        public async Task<ActionResult<IEnumerable<Job>>> GetJobs([FromQuery] int appointmentId)
         {
             try
             {
-                var jobs = await _jobService.GetJobsAsync();
+                var jobs = await _jobService.GetJobsByAppointmentId(appointmentId);
                 return Ok(jobs);
             }
             catch (UnauthorizedException ex)
@@ -37,11 +37,10 @@ namespace hoistmt.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
-        
+
         [HttpPost("add")]
         public async Task<IActionResult> AddJob([FromBody] Job job)
         {
@@ -164,6 +163,210 @@ namespace hoistmt.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, "Internal Server Error: " + ex.Message);
+            }
+        }
+
+        // [HttpPut("updateStatus/{jobId}")]
+        // public async Task<IActionResult> UpdateJobStatus(int jobId, [FromBody] int statusId)
+        // {
+        //     try
+        //     {
+        //         var updatedJob = await _jobService.UpdateJobStatus(jobId, statusId);
+        //         return Ok(updatedJob);
+        //     }
+        //     catch (UnauthorizedException ex)
+        //     {
+        //         return Unauthorized(ex.Message);
+        //     }
+        //     catch (NotFoundException ex)
+        //     {
+        //         return NotFound(ex.Message);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, "An error occurred while processing your request.");
+        //     }
+        // }
+
+        [HttpPost("status")]
+        public async Task<IActionResult> AddJobStatus([FromBody] JobStatus jobStatus)
+        {
+            try
+            {
+                var addedStatus = await _jobService.AddJobStatus(jobStatus);
+                return CreatedAtAction(nameof(GetJobStatusByID), new { statusId = addedStatus.id }, addedStatus);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpDelete("status/{statusId}")]
+        public async Task<IActionResult> DeleteJobStatus(int statusId)
+        {
+            try
+            {
+                await _jobService.DeleteJobStatus(statusId);
+                return Ok("Job status deleted successfully");
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpGet("statuses")]
+        public async Task<ActionResult<IEnumerable<JobStatus>>> GetJobStatuses()
+        {
+            try
+            {
+                var statuses = await _jobService.GetJobStatuses();
+                return Ok(statuses);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpGet("status/{statusId}")]
+        public async Task<ActionResult<JobStatus>> GetJobStatusByID(int statusId)
+        {
+            try
+            {
+                var status = await _jobService.GetJobStatusByID(statusId);
+                return Ok(status);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpGet("types")]
+        public async Task<ActionResult<IEnumerable<JobTypes>>> GetJobTypes()
+        {
+            try
+            {
+                var types = await _jobService.GetJobTypes();
+                return Ok(types);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpGet("type/{typeId}")]
+        public async Task<ActionResult<JobTypes>> GetJobTypeByID(int typeId)
+        {
+            try
+            {
+                var type = await _jobService.GetJobTypeByID(typeId);
+                return Ok(type);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpPut("type")]
+        public async Task<IActionResult> UpdateJobType([FromBody] JobTypes jobType)
+        {
+            try
+            {
+                var updatedType = await _jobService.UpdateJobType(jobType);
+                return Ok(updatedType);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpPost("type")]
+        public async Task<IActionResult> AddJobType([FromBody] JobTypes jobType)
+        {
+            try
+            {
+                var addedType = await _jobService.AddJobType(jobType);
+                return CreatedAtAction(nameof(GetJobTypeByID), new { typeId = addedType.id }, addedType);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpDelete("type/{typeId}")]
+        public async Task<IActionResult> DeleteJobType(int typeId)
+        {
+            try
+            {
+                await _jobService.DeleteJobType(typeId);
+                return Ok("Job type deleted successfully");
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
             }
         }
     }

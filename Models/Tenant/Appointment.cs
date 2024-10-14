@@ -2,15 +2,16 @@
 
 public class Appointment
 {
-    //id, title, start_time, end_time, description, notes, Active, lastModified
     public int id { get; set; }
-    public string title { get; set; }
-    public DateTime start_time { get; set; }
-    public DateTime end_time { get; set; }
-    public string? description { get; set; }
+    public DateTime start_time { get; set; }  // This should map directly from the JSON
+    public DateTime end_time { get; set; }    // This should map directly from the JSON
     public string? notes { get; set; }
     public int Active { get; set; }
-    public string? backgroundColor { get; set; }
-    public int eventID { get; set; }
     public DateTime lastModified { get; set; }
+
+    public List<string> Jobs { get; set; }
+    public int? BookingStatusID { get; set; }
+    public int? invoiceID { get; set; }
+    public int? customerID { get; set; }
+    public int? vehicleID { get; set; }
 }

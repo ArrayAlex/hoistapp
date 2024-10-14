@@ -20,31 +20,22 @@ namespace hoistmt.Models
         [Column("technician_id")]
         public int? TechnicianId { get; set; }
 
-        [Column("invoice_id")]
-        public int? InvoiceId { get; set; }
-
-        [Column("start_date")]
-        public DateTime StartDate { get; set; }
-
-        [Column("end_date")]
-        public DateTime? EndDate { get; set; }
-
-        [Column("pickup_date")]
-        public DateTime? PickupDate { get; set; }
-
-        [Column("description")]
-        public string Description { get; set; }
-
         [Column("notes")]
         public string Notes { get; set; }
 
-        [Column("status")]
-        public string Status { get; set; }
+        [Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 
-        [Column("updated_at")]
-        public DateTime UpdatedAt { get; set; }
+        [Column("JobStatusID")]
+        public int JobStatusID { get; set; }
+
+        [Column("JobTypeID")]
+        public int JobTypeID { get; set; }
+
+        [Column("AppointmentId")]
+        public int AppointmentId { get; set; }
     }
 }
