@@ -1,9 +1,8 @@
-﻿
-using hoistmt.Models;
+﻿using hoistmt.Models;
 using hoistmt.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json; 
+using System.Text.Json;
 using System.Globalization;
 using hoistmt.Interfaces;
 using System.Text.Json;
@@ -20,12 +19,12 @@ namespace hoistmt.Controllers
         public AppointmentController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver)
         {
             _tenantDbContextResolver = tenantDbContextResolver;
-
         }
         //test
 
-         [HttpGet("Appointments")]
-        public async Task<ActionResult<IEnumerable<object>>> GetAppointments([FromQuery] string startDate, [FromQuery] string endDate)
+        [HttpGet("Appointments")]
+        public async Task<ActionResult<IEnumerable<object>>> GetAppointments([FromQuery] string startDate,
+            [FromQuery] string endDate)
         {
             var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
             if (dbContext == null)
@@ -38,72 +37,74 @@ namespace hoistmt.Controllers
                 return BadRequest("Start date and end date parameters are required.");
             }
 
-            var startDateTime = DateTime.Parse(startDate, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal).ToUniversalTime();
-            var endDateTime = DateTime.Parse(endDate, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal).ToUniversalTime();
+            var startDateTime = DateTime.Parse(startDate, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal)
+                .ToUniversalTime();
+            var endDateTime = DateTime.Parse(endDate, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal)
+                .ToUniversalTime();
 
             Console.WriteLine($"Fetching appointments between {startDateTime} and {endDateTime}");
 
             try
             {
                 var query = from a in dbContext.appointments
-            join bs in dbContext.bookingstatus on a.BookingStatusID equals bs.id
-            join c in dbContext.customers on a.customerID equals c.id
-            join v in dbContext.vehicles on a.vehicleID equals v.id
-            where a.Active != 0 && 
-                  a.start_time >= startDateTime && 
-                  a.end_time <= endDateTime
-            select new
-            {
-                Id = a.id,
-                StartTime = a.start_time,
-                EndTime = a.end_time,
-                Notes = a.notes,
-                Active = a.Active,
-                LastModified = a.lastModified,
-                Jobs = a.Jobs,  // Keep it as is
-                BookingStatus = new
-                {
-                    Id = bs.id,
-                    Title = bs.title,
-                    Color = bs.color
-                },
-                InvoiceID = a.invoiceID,
+                    join bs in dbContext.bookingstatus on a.BookingStatusID equals bs.id
+                    join c in dbContext.customers on a.customerID equals c.id
+                    join v in dbContext.vehicles on a.vehicleID equals v.id
+                    where a.Active != 0 &&
+                          a.start_time >= startDateTime &&
+                          a.end_time <= endDateTime
+                    select new
+                    {
+                        Id = a.id,
+                        StartTime = a.start_time,
+                        EndTime = a.end_time,
+                        Notes = a.notes,
+                        Active = a.Active,
+                        LastModified = a.lastModified,
+                        Jobs = a.Jobs, // Keep it as is
+                        BookingStatus = new
+                        {
+                            Id = bs.id,
+                            Title = bs.title,
+                            Color = bs.color
+                        },
+                        InvoiceID = a.invoiceID,
 
-                Customer = new
-                {
-                    Id = c.id,
-                    Name = c.FirstName + ' ' + c.LastName,
-                    Phone = c.Phone
-                },
-                Vehicle = new
-                {
-                    Id = v.id,
-                    Make = v.make,
-                    Model = v.model,
-                    Rego = v.rego
-                }
-            };
+                        Customer = new
+                        {
+                            Id = c.id,
+                            Name = c.FirstName + ' ' + c.LastName,
+                            Phone = c.Phone
+                        },
+                        Vehicle = new
+                        {
+                            Id = v.id,
+                            Make = v.make,
+                            Model = v.model,
+                            Rego = v.rego
+                        }
+                    };
 
 // Execute the query and materialize the result
-            var bookings = await query.ToListAsync();
+                var bookings = await query.ToListAsync();
 
-            // Serialize Jobs after the query
-            var result = bookings.Select(b => new
-            {
-                b.Id,
-                b.StartTime,
-                b.EndTime,
-                b.Notes,
-                b.Active,
-                b.LastModified,
-                Jobs = JsonSerializer.Serialize(b.Jobs),  // Serialize here
-                b.BookingStatus,
-                b.InvoiceID,
-                b.Customer,
-                b.Vehicle
-            }).ToList();
+                // Serialize Jobs after the query
+                var result = bookings.Select(b => new
+                {
+                    b.Id,
+                    b.StartTime,
+                    b.EndTime,
+                    b.Notes,
+                    b.Active,
+                    b.LastModified,
+                    Jobs = JsonSerializer.Serialize(b.Jobs), // Serialize here
+                    b.BookingStatus,
+                    b.InvoiceID,
+                    b.Customer,
+                    b.Vehicle
+                }).ToList();
 
-            return Ok(result);
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -114,7 +115,8 @@ namespace hoistmt.Controllers
 
 
         [HttpPut("updateCustomer/{appointmentId}")]
-        public async Task<IActionResult> UpdateAppointmentCustomer(int appointmentId, [FromBody] CustomerUpdateModel model)
+        public async Task<IActionResult> UpdateAppointmentCustomer(int appointmentId,
+            [FromBody] CustomerUpdateModel model)
         {
             try
             {
@@ -157,14 +159,12 @@ namespace hoistmt.Controllers
             }
         }
 
-        
+
         [HttpPut("update")]
         public async Task<bool> UpdateAppointment([FromBody] Appointment appointment)
         {
             try
             {
-
-
                 // Get the application db context
                 var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
 
@@ -188,7 +188,6 @@ namespace hoistmt.Controllers
                 // appointmentEntity.eventID = appointment.eventID;
                 appointmentEntity.Active = 1;
 
-           
 
                 // Save changes to the database
                 await dbContext.SaveChangesAsync();
@@ -208,7 +207,6 @@ namespace hoistmt.Controllers
         {
             try
             {
-                
                 // Get the application db context
                 var dbContext = await _tenantDbContextResolver.GetTenantDbContextAsync();
 
@@ -278,6 +276,6 @@ namespace hoistmt.Controllers
 }
 
 public class CustomerUpdateModel
-    {
-        public int CustomerId { get; set; }
-    }
+{
+    public int CustomerId { get; set; }
+}

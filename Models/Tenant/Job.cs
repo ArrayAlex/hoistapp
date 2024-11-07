@@ -37,5 +37,8 @@ namespace hoistmt.Models
 
         [Column("AppointmentId")]
         public int AppointmentId { get; set; }
+        
+        [Column("JobBoardID")]
+        public int JobBoardID { get; set; }
     }
 }
