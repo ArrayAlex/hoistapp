@@ -2913,11 +2913,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Nulle\\Documents\\hoistapp2\\hoistmt.csproj",
+      "projectUniqueName": "C:\\Users\\Nulle\\Documents\\HoistApp\\hoistmt.csproj",
       "projectName": "hoistmt",
-      "projectPath": "C:\\Users\\Nulle\\Documents\\hoistapp2\\hoistmt.csproj",
+      "projectPath": "C:\\Users\\Nulle\\Documents\\HoistApp\\hoistmt.csproj",
       "packagesPath": "C:\\Users\\Nulle\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Nulle\\Documents\\hoistapp2\\obj\\",
+      "outputPath": "C:\\Users\\Nulle\\Documents\\HoistApp\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Nulle\\AppData\\Roaming\\NuGet\\NuGet.Config"
