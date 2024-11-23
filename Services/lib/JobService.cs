@@ -185,8 +185,13 @@ namespace hoistmt.Services.lib
                 return null; // Return null if the job doesn't exist
             }
 
+            TimeZoneInfo nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById("New Zealand Standard Time");
+
+// Convert UTC to New Zealand Time
+            DateTime nzTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, nzTimeZone);
             // Update the jobBoardID
             job.JobBoardID = newJobBoardId;
+            job.UpdatedAt = nzTime;
 
             // Save changes to the database
             _context.jobs.Update(job);
