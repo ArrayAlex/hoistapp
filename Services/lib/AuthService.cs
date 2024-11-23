@@ -98,6 +98,8 @@ public class AuthService : IDisposable
         await _context.SaveChangesAsync();
         var newUser = await _masterDbContext.Companies.FirstOrDefaultAsync(c => c.CompanyID == login.Company);
         var accountUser = await _context.accounts.FirstOrDefaultAsync(u => u.Id == session.userID);
+        var jobStatuses = await _context.jobstatus.ToListAsync();
+        var jobTypes = await _context.jobtypes.ToListAsync();
        
         return new
         {
@@ -121,7 +123,9 @@ public class AuthService : IDisposable
                 Email = accountUser.email,
                 Role = accountUser.position,
                 Phone = account.phone
-            }
+            },
+            JobStatuses = jobStatuses,
+            JobTypes = jobTypes
             
         };
     }

@@ -13,11 +13,13 @@ namespace hoistmt.Services.lib
     {
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
         private TenantDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public JobService(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver)
+        public JobService(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver,IHttpContextAccessor httpContextAccessor)
         {
             _tenantDbContextResolver = tenantDbContextResolver ??
                                        throw new ArgumentNullException(nameof(tenantDbContextResolver));
+            _httpContextAccessor = httpContextAccessor;
         }
 
         private async Task EnsureContextInitializedAsync()
@@ -58,8 +60,9 @@ namespace hoistmt.Services.lib
                     Notes = job.Notes,
                     UpdatedAt = job.UpdatedAt,
                     CreatedAt = job.CreatedAt,
-                    AppointmentId = job.AppointmentId,
+                    //AppointmentId = job.AppointmentId,
                     JobBoardID = job.JobBoardID,
+                    CreatedBy = job.CreatedBy,
                     JobStatus = new JobStatusDetails
                     {
                         Id = job.JobStatusID,
@@ -109,28 +112,7 @@ namespace hoistmt.Services.lib
                         {
                             Id = account.Id,
                             Name = account.Name
- /*       public int Id { get; set; }
-        public string Name { get; set; }
-        public string Password { get; set; }
-        public string? contact { get; set; }
-        public string email { get; set; }
-        public bool Active { get; set; }
-        public string Username { get; set; }
-
-        public string? roleName { get; set; }
-
-        public string? position { get; set; }
-
-        public string? phone { get; set; }
-
-        public int roleID { get; set; }
-        public string? ResetToken { get; set; }
-        public DateTime? ResetTokenExpiry { get; set; }
-        public string? VerificationToken { get; set; }
-        public DateTime? VerificationTokenExpiry { get; set; }
-        public bool? IsVerified { get; set; }
-
-        public bool? isTech { get; set; }*/
+ 
 
                         }
                     
@@ -139,11 +121,37 @@ namespace hoistmt.Services.lib
             return await query.ToListAsync();
         }
 
-        public async Task<Job> AddJobAsync(Job job)
+        public async Task<Job> AddJobAsync(NewJob newJob)
         {
             await EnsureContextInitializedAsync();
-            _context.jobs.Add(job);
-            await _context.SaveChangesAsync();
+            Console.WriteLine(newJob);
+            // Map NewJob to Jo
+            TimeZoneInfo nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById("New Zealand Standard Time");
+
+// Convert UTC to New Zealand Time
+            DateTime nzTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, nzTimeZone);
+            // Extract the tenant database schema name from the session
+            var userid = _httpContextAccessor.HttpContext.Session.GetInt32("userid");
+            var job = new Job
+            {
+                CustomerId = newJob.CustomerId,
+                VehicleId = newJob.VehicleId,
+                TechnicianId = newJob.TechnicianId,
+                Notes = newJob.Notes,
+                JobStatusID = newJob.JobStatus,
+                JobTypeID = newJob.JobType,
+                JobBoardID = newJob.JobBoardID,
+                AppointmentId = newJob.AppointmentId,
+                CreatedBy = userid,
+
+                // Set CreatedAt and UpdatedAt explicitly
+                CreatedAt = nzTime,
+                UpdatedAt = nzTime
+            };
+
+            _context.jobs.Add(job); // Add the Job to the context
+            await _context.SaveChangesAsync(); // Save to database
+
             return job;
         }
         
@@ -190,41 +198,41 @@ namespace hoistmt.Services.lib
 
 
 
-        public async Task<IEnumerable<JobWithDetails>> GetJobsByAppointmentId(int appointmentId)
-        {
-            await EnsureContextInitializedAsync();
-
-            return await _context.jobs
-                .Where(j => j.AppointmentId == appointmentId)
-                .Select(j => new JobWithDetails
-                {
-                    JobId = j.JobId,
-                    CustomerId = j.CustomerId,
-                    VehicleId = j.VehicleId,
-                    TechnicianId = j.TechnicianId,
-                    Notes = j.Notes,
-                    UpdatedAt = j.UpdatedAt,
-                    CreatedAt = j.CreatedAt,
-                    AppointmentId = j.AppointmentId,
-                    JobStatus = new JobStatusDetails
-                    {
-                        Id = j.JobStatusID,
-                        Title = _context.jobstatus.Where(js => js.id == j.JobStatusID).Select(js => js.title)
-                            .FirstOrDefault(),
-                        Color = _context.jobstatus.Where(js => js.id == j.JobStatusID).Select(js => js.color)
-                            .FirstOrDefault()
-                    },
-                    JobType = new JobTypeDetails
-                    {
-                        Id = j.JobTypeID,
-                        Title = _context.jobtypes.Where(jt => jt.id == j.JobTypeID).Select(jt => jt.title)
-                            .FirstOrDefault(),
-                        Color = _context.jobtypes.Where(jt => jt.id == j.JobTypeID).Select(jt => jt.color)
-                            .FirstOrDefault()
-                    }
-                })
-                .ToListAsync();
-        }
+        // public async Task<IEnumerable<JobWithDetails>> GetJobsByAppointmentId(int appointmentId)
+        // {
+        //     await EnsureContextInitializedAsync();
+        //
+        //     return await _context.jobs
+        //         .Where(j => j.AppointmentId == appointmentId)
+        //         .Select(j => new JobWithDetails
+        //         {
+        //             JobId = j.JobId,
+        //             CustomerId = j.CustomerId,
+        //             VehicleId = j.VehicleId,
+        //             TechnicianId = j.TechnicianId,
+        //             Notes = j.Notes,
+        //             UpdatedAt = j.UpdatedAt,
+        //             CreatedAt = j.CreatedAt,
+        //             AppointmentId = j.AppointmentId,
+        //             JobStatus = new JobStatusDetails
+        //             {
+        //                 Id = j.JobStatusID,
+        //                 Title = _context.jobstatus.Where(js => js.id == j.JobStatusID).Select(js => js.title)
+        //                     .FirstOrDefault(),
+        //                 Color = _context.jobstatus.Where(js => js.id == j.JobStatusID).Select(js => js.color)
+        //                     .FirstOrDefault()
+        //             },
+        //             JobType = new JobTypeDetails
+        //             {
+        //                 Id = j.JobTypeID,
+        //                 Title = _context.jobtypes.Where(jt => jt.id == j.JobTypeID).Select(jt => jt.title)
+        //                     .FirstOrDefault(),
+        //                 Color = _context.jobtypes.Where(jt => jt.id == j.JobTypeID).Select(jt => jt.color)
+        //                     .FirstOrDefault()
+        //             }
+        //         })
+        //         .ToListAsync();
+        // }
 
         public async Task<Job> GetJobDetails(int id)
         {
@@ -277,11 +285,14 @@ namespace hoistmt.Services.lib
             existingJob.CustomerId = job.CustomerId;
             existingJob.VehicleId = job.VehicleId;
             existingJob.TechnicianId = job.TechnicianId;
+            TimeZoneInfo nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById("New Zealand Standard Time");
 
+// Convert UTC to New Zealand Time
+            DateTime nzTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, nzTimeZone);
 
             existingJob.Notes = job.Notes;
 
-            existingJob.UpdatedAt = DateTime.UtcNow;
+            existingJob.UpdatedAt = nzTime;
 
             await _context.SaveChangesAsync();
             return existingJob;

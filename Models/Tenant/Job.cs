@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace hoistmt.Models
 {
     [Table("jobs")]
-    public class Job
+    public class Job 
     {
         [Key]
         [Column("job_id")]
@@ -24,21 +24,24 @@ namespace hoistmt.Models
         public string? Notes { get; set; }
 
         [Column("updated_at")]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         [Column("created_at")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
 
         [Column("JobStatusID")]
-        public int JobStatusID { get; set; }
+        public int? JobStatusID { get; set; }
 
         [Column("JobTypeID")]
-        public int JobTypeID { get; set; }
-
-        [Column("AppointmentId")]
-        public int AppointmentId { get; set; }
+        public int? JobTypeID { get; set; }
         
         [Column("JobBoardID")]
-        public int JobBoardID { get; set; }
+        public int? JobBoardID { get; set; }
+        
+        [Column("AppointmentId")]
+        public int? AppointmentId { get; set; }
+        
+        [Column("created_by")]
+        public int? CreatedBy { get; set; }
     }
 }

@@ -41,30 +41,30 @@ namespace hoistmt.Controllers
             }
         }
         
-        [HttpGet("job")]
-        public async Task<ActionResult<IEnumerable<Job>>> GetJob([FromQuery] int appointmentId)
-        {
-            try
-            {
-                var jobs = await _jobService.GetJobsByAppointmentId(appointmentId);
-                return Ok(jobs);
-            }
-            catch (UnauthorizedException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "An error occurred while processing your request.");
-            }
-        }
+        // [HttpGet("job")]
+        // public async Task<ActionResult<IEnumerable<Job>>> GetJob([FromQuery] int appointmentId)
+        // {
+        //     try
+        //     {
+        //         var jobs = await _jobService.GetJobsByAppointmentId(appointmentId);
+        //         return Ok(jobs);
+        //     }
+        //     catch (UnauthorizedException ex)
+        //     {
+        //         return Unauthorized(ex.Message);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, "An error occurred while processing your request.");
+        //     }
+        // }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddJob([FromBody] Job job)
+        public async Task<IActionResult> AddJob([FromBody] NewJob newJob)
         {
             try
             {
-                var addedJob = await _jobService.AddJobAsync(job);
+                var addedJob = await _jobService.AddJobAsync(newJob); // Passing NewJob
                 return CreatedAtAction(nameof(GetJobDetails), new { id = addedJob.JobId }, addedJob);
             }
             catch (UnauthorizedException ex)

@@ -14,10 +14,12 @@ namespace hoistmt.Models
     public int VehicleId { get; set; }
     public int? TechnicianId { get; set; }
     public string Notes { get; set; }
-    public DateTime UpdatedAt { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public int AppointmentId { get; set; }
-    public int JobBoardID { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
+    public int? AppointmentId { get; set; }
+    public int?  JobBoardID { get; set; }
+    public int? CreatedBy { get; set; }
+    
     public JobStatusDetails JobStatus { get; set; }
     public JobTypeDetails JobType { get; set; }
     public Customer  Customer { get; set; }
@@ -27,14 +29,14 @@ namespace hoistmt.Models
 
 public class JobStatusDetails
 {
-    public int Id { get; set; }
+    public int? Id { get; set; }
     public string Title { get; set; }
     public string Color { get; set; }
 }
 
 public class JobTypeDetails
 {
-    public int Id { get; set; }
+    public int? Id { get; set; }
     public string Title { get; set; }
     public string Color { get; set; }
 }
