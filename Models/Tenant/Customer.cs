@@ -15,5 +15,7 @@ public class Customer
     // public bool? AccountApproved { get; set; } 
     // public bool? OnHold { get; set; } 
     public string? notes { get; set; } 
+    public int? created_by { get; set; } 
+    public int? updated_by { get; set; } 
     public DateTime? modified_at { get; set; }
 }

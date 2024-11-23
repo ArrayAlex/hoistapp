@@ -11,11 +11,13 @@ public class CustomerService : IDisposable
     private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
     private TenantDbContext _context;
     private bool _disposed = false;
-
-    public CustomerService(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    
+    public CustomerService(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver, IHttpContextAccessor httpContextAccessor)
     {
         _tenantDbContextResolver =
             tenantDbContextResolver ?? throw new ArgumentNullException(nameof(tenantDbContextResolver));
+        _httpContextAccessor = httpContextAccessor;
     }
 
     private async Task EnsureContextInitializedAsync()
@@ -102,11 +104,13 @@ public class CustomerService : IDisposable
     {
         await EnsureContextInitializedAsync();
         var existingCustomer = await _context.customers.FirstOrDefaultAsync(c => c.id == customer.id);
+        var userid = _httpContextAccessor.HttpContext.Session.GetInt32("userid");
         
         existingCustomer.FirstName = customer.FirstName;
         existingCustomer.LastName = customer.LastName;
         existingCustomer.Email = customer.Email;
         existingCustomer.Phone = customer.Phone;
+        existingCustomer.updated_by = userid;
         
         await _context.SaveChangesAsync();
         return existingCustomer;
@@ -115,12 +119,15 @@ public class CustomerService : IDisposable
     public async Task<Customer> AddCustomer(Customer customer)
     {
         await EnsureContextInitializedAsync();
+        var userid = _httpContextAccessor.HttpContext.Session.GetInt32("userid");
         var CustomerEntity = new Customer
         {
             FirstName = customer.FirstName,
             LastName = customer.LastName,
             Email = customer.Email,
             Phone = customer.Phone,
+            updated_by = userid,
+            created_by = userid
         };
         
         _context.customers.Add(CustomerEntity);

@@ -124,7 +124,9 @@ namespace hoistmt.Services.lib
         public async Task<Job> AddJobAsync(NewJob newJob)
         {
             await EnsureContextInitializedAsync();
-            Console.WriteLine(newJob);
+            await EnsureContextInitializedAsync();
+            Console.WriteLine("tttttt");
+            Console.WriteLine(newJob.jobStatusId);
             // Map NewJob to Jo
             TimeZoneInfo nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById("New Zealand Standard Time");
 
@@ -138,11 +140,12 @@ namespace hoistmt.Services.lib
                 VehicleId = newJob.VehicleId,
                 TechnicianId = newJob.TechnicianId,
                 Notes = newJob.Notes,
-                JobStatusID = newJob.JobStatus,
-                JobTypeID = newJob.JobType,
+                JobStatusID = newJob.jobStatusId,
+                JobTypeID = newJob.jobTypeId,
                 JobBoardID = newJob.JobBoardID,
                 AppointmentId = newJob.AppointmentId,
                 CreatedBy = userid,
+                updated_by = userid,
 
                 // Set CreatedAt and UpdatedAt explicitly
                 CreatedAt = nzTime,
@@ -291,8 +294,8 @@ namespace hoistmt.Services.lib
             existingJob.VehicleId = job.VehicleId;
             existingJob.TechnicianId = job.TechnicianId;
             TimeZoneInfo nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById("New Zealand Standard Time");
+            var userid = _httpContextAccessor.HttpContext.Session.GetInt32("userid");
 
-// Convert UTC to New Zealand Time
             DateTime nzTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, nzTimeZone);
 
             existingJob.Notes = job.Notes;
@@ -300,6 +303,7 @@ namespace hoistmt.Services.lib
             existingJob.UpdatedAt = nzTime;
             existingJob.JobStatusID = job.JobStatusID;
             existingJob.JobTypeID = job.JobTypeID;
+            existingJob.updated_by = userid;
 
             Console.WriteLine(job);
 

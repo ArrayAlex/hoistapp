@@ -43,5 +43,8 @@ namespace hoistmt.Models
         
         [Column("created_by")]
         public int? CreatedBy { get; set; }
+        
+        [Column("updated_by")]
+        public int? updated_by { get; set; }
     }
 }
