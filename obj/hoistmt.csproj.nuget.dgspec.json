@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Nulle\\Documents\\HoistApp\\hoistmt.csproj": {}
+    "C:\\Users\\Nulle\\Documents\\hoistapp\\hoistmt.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Nulle\\Documents\\HoistApp\\hoistmt.csproj": {
+    "C:\\Users\\Nulle\\Documents\\hoistapp\\hoistmt.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Nulle\\Documents\\HoistApp\\hoistmt.csproj",
+        "projectUniqueName": "C:\\Users\\Nulle\\Documents\\hoistapp\\hoistmt.csproj",
         "projectName": "hoistmt",
-        "projectPath": "C:\\Users\\Nulle\\Documents\\HoistApp\\hoistmt.csproj",
+        "projectPath": "C:\\Users\\Nulle\\Documents\\hoistapp\\hoistmt.csproj",
         "packagesPath": "C:\\Users\\Nulle\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Nulle\\Documents\\HoistApp\\obj\\",
+        "outputPath": "C:\\Users\\Nulle\\Documents\\hoistapp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Nulle\\AppData\\Roaming\\NuGet\\NuGet.Config"

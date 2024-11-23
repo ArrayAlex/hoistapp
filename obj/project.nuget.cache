@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "mMEELVI5Kws=",
+  "dgSpecHash": "WCkvS75sibk=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Nulle\\Documents\\HoistApp\\hoistmt.csproj",
+  "projectFilePath": "C:\\Users\\Nulle\\Documents\\hoistapp\\hoistmt.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.entityframeworkcore\\8.0.4\\microsoft.entityframeworkcore.8.0.4.nupkg.sha512",
     "C:\\Users\\Nulle\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\8.0.4\\microsoft.entityframeworkcore.abstractions.8.0.4.nupkg.sha512",

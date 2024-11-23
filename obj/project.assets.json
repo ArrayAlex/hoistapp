@@ -2919,6 +2919,7 @@
       "packagesPath": "C:\\Users\\Nulle\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\Nulle\\Documents\\HoistApp\\obj\\",
       "projectStyle": "PackageReference",
+      "UsingMicrosoftNETSdk": false,
       "configFilePaths": [
         "C:\\Users\\Nulle\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
