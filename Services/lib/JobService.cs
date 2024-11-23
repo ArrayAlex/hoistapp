@@ -296,6 +296,8 @@ namespace hoistmt.Services.lib
             existingJob.JobStatusID = job.JobStatusID;
             existingJob.JobTypeID = job.JobTypeID;
 
+            Console.WriteLine(job);
+
             await _context.SaveChangesAsync();
             return existingJob;
         }
