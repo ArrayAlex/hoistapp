@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using hoistmt.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using hoistmt.Models;
+using hoistmt.Models.Tenant;
 using SendGrid.Helpers.Errors.Model;
 
 namespace hoistmt.Services.lib
@@ -38,10 +39,16 @@ namespace hoistmt.Services.lib
             var query = from job in _context.jobs
                 join jobStatus in _context.jobstatus on job.JobStatusID equals jobStatus.id
                 join jobType in _context.jobtypes on job.JobTypeID equals jobType.id
+                
                 join vehicle in _context.vehicles on job.VehicleId equals vehicle.id into vehicleJoin
-                from vehicle in vehicleJoin.DefaultIfEmpty() // Left join, will return null if no match
+                from vehicle in vehicleJoin.DefaultIfEmpty() 
+                
                 join customer in _context.customers on job.CustomerId equals customer.id into customerJoin
-                from customer in customerJoin.DefaultIfEmpty() // Left join, will return null if no match
+                from customer in customerJoin.DefaultIfEmpty() 
+                
+                join account in _context.accounts on job.TechnicianId equals account.Id into accountJoin
+                from account in accountJoin.DefaultIfEmpty() 
+                
                 select new JobWithDetails
                 {
                     JobId = job.JobId,
@@ -95,7 +102,38 @@ namespace hoistmt.Services.lib
                             rego = vehicle.rego,
                             vin = vehicle.vin,
                             year = vehicle.year
+                        },
+                    Technician = account == null
+                        ? null
+                        : new Technician()
+                        {
+                            Id = account.Id,
+                            Name = account.Name
+ /*       public int Id { get; set; }
+        public string Name { get; set; }
+        public string Password { get; set; }
+        public string? contact { get; set; }
+        public string email { get; set; }
+        public bool Active { get; set; }
+        public string Username { get; set; }
+
+        public string? roleName { get; set; }
+
+        public string? position { get; set; }
+
+        public string? phone { get; set; }
+
+        public int roleID { get; set; }
+        public string? ResetToken { get; set; }
+        public DateTime? ResetTokenExpiry { get; set; }
+        public string? VerificationToken { get; set; }
+        public DateTime? VerificationTokenExpiry { get; set; }
+        public bool? IsVerified { get; set; }
+
+        public bool? isTech { get; set; }*/
+
                         }
+                    
                 };
 
             return await query.ToListAsync();

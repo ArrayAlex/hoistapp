@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using hoistmt.Models.Tenant;
 
 namespace hoistmt.Models
 {
@@ -21,6 +22,7 @@ namespace hoistmt.Models
     public JobTypeDetails JobType { get; set; }
     public Customer  Customer { get; set; }
     public Vehicle Vehicle { get; set; }
+    public Technician Technician { get; set; }
 }
 
 public class JobStatusDetails

@@ -2,6 +2,7 @@
 using hoistmt.Models;
 using hoistmt.Models.Billing;
 using hoistmt.Models.MasterDbModels;
+using hoistmt.Models.Tenant;
 using hoistmt.Models.Tenant.Billing;
 using Microsoft.EntityFrameworkCore;
 using Vehicle = hoistmt.Models.Vehicle;

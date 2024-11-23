@@ -73,6 +73,7 @@ public class Startup
         services.AddScoped<Credits>();
         services.AddScoped<JobService>();
         services.AddScoped<EmailService>();
+        services.AddScoped<TechnicianService>();
         services.AddScoped<AccountSubscription >();
         services.AddScoped<StripeService>();
         services.AddScoped<IVehicleService, VehicleService>();
