@@ -16,8 +16,11 @@ namespace hoistmt.Models
     public DateTime UpdatedAt { get; set; }
     public DateTime CreatedAt { get; set; }
     public int AppointmentId { get; set; }
+    public int JobBoardID { get; set; }
     public JobStatusDetails JobStatus { get; set; }
     public JobTypeDetails JobType { get; set; }
+    public Customer  Customer { get; set; }
+    public Vehicle Vehicle { get; set; }
 }
 
 public class JobStatusDetails

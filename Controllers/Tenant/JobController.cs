@@ -24,7 +24,25 @@ namespace hoistmt.Controllers
         }
         
         [HttpGet("jobs")]
-        public async Task<ActionResult<IEnumerable<Job>>> GetJobs([FromQuery] int appointmentId)
+        public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
+        {
+            try
+            {
+                var jobs = await _jobService.GetJobsAsync();
+                return Ok(jobs);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+        
+        [HttpGet("job")]
+        public async Task<ActionResult<IEnumerable<Job>>> GetJob([FromQuery] int appointmentId)
         {
             try
             {
@@ -59,7 +77,7 @@ namespace hoistmt.Controllers
             }
         }
         
-        [HttpGet("job/{id}")]
+        [HttpPut("job/{id}")]
         public async Task<IActionResult> GetJobDetails(int id)
         {
             try
@@ -80,14 +98,18 @@ namespace hoistmt.Controllers
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
-
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Job>>> SearchJobs([FromQuery] string searchTerm)
+        
+        [HttpPut("jobboardid/{jobId}")]
+        public async Task<IActionResult> UpdateJobDetails(int jobId, [FromBody] int newJobBoardId)
         {
             try
             {
-                var jobs = await _jobService.SearchJobs(searchTerm);
-                return Ok(jobs);
+                var job = await _jobService.UpdateJobBoardIdAsync(jobId, newJobBoardId);
+                if (job == null)
+                {
+                    return NotFound($"Job with ID {jobId} not found.");
+                }
+                return Ok(job);
             }
             catch (UnauthorizedException ex)
             {
@@ -95,10 +117,29 @@ namespace hoistmt.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"Error searching Jobs: {ex.Message}");
-                return StatusCode(500, "Internal Server Error");
+                return StatusCode(500, "An error occurred while processing your request.");
             }
         }
+
+
+        // [HttpGet("search")]
+        // public async Task<ActionResult<IEnumerable<Job>>> SearchJobs([FromQuery] string searchTerm)
+        // {
+        //     try
+        //     {
+        //         var jobs = await _jobService.SearchJobs(searchTerm);
+        //         return Ok(jobs);
+        //     }
+        //     catch (UnauthorizedException ex)
+        //     {
+        //         return Unauthorized(ex.Message);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         System.Diagnostics.Trace.WriteLine($"Error searching Jobs: {ex.Message}");
+        //         return StatusCode(500, "Internal Server Error");
+        //     }
+        // }
 
         [HttpGet("customer/{customerId}")]
         public async Task<IActionResult> GetJobsByCustomerId(int customerId)

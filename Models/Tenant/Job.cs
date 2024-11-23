@@ -21,7 +21,7 @@ namespace hoistmt.Models
         public int? TechnicianId { get; set; }
 
         [Column("notes")]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
 
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; }

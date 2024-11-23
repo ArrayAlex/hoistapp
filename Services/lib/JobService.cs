@@ -15,9 +15,10 @@ namespace hoistmt.Services.lib
 
         public JobService(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver)
         {
-            _tenantDbContextResolver = tenantDbContextResolver ?? throw new ArgumentNullException(nameof(tenantDbContextResolver));
+            _tenantDbContextResolver = tenantDbContextResolver ??
+                                       throw new ArgumentNullException(nameof(tenantDbContextResolver));
         }
-        
+
         private async Task EnsureContextInitializedAsync()
         {
             if (_context == null)
@@ -29,13 +30,77 @@ namespace hoistmt.Services.lib
                 }
             }
         }
-        
-        public async Task<IEnumerable<Job>> GetJobsAsync()
+
+        public async Task<IEnumerable<JobWithDetails>> GetJobsAsync()
         {
             await EnsureContextInitializedAsync();
-            return await _context.jobs.ToListAsync();
+
+            var query = from job in _context.jobs
+                join jobStatus in _context.jobstatus on job.JobStatusID equals jobStatus.id
+                join jobType in _context.jobtypes on job.JobTypeID equals jobType.id
+                join vehicle in _context.vehicles on job.VehicleId equals vehicle.id into vehicleJoin
+                from vehicle in vehicleJoin.DefaultIfEmpty() // Left join, will return null if no match
+                join customer in _context.customers on job.CustomerId equals customer.id into customerJoin
+                from customer in customerJoin.DefaultIfEmpty() // Left join, will return null if no match
+                select new JobWithDetails
+                {
+                    JobId = job.JobId,
+                    CustomerId = job.CustomerId,
+                    VehicleId = job.VehicleId,
+                    TechnicianId = job.TechnicianId,
+                    Notes = job.Notes,
+                    UpdatedAt = job.UpdatedAt,
+                    CreatedAt = job.CreatedAt,
+                    AppointmentId = job.AppointmentId,
+                    JobBoardID = job.JobBoardID,
+                    JobStatus = new JobStatusDetails
+                    {
+                        Id = job.JobStatusID,
+                        Title = jobStatus.title,
+                        Color = jobStatus.color
+                    },
+                    JobType = new JobTypeDetails
+                    {
+                        Id = job.JobTypeID,
+                        Title = jobType.title,
+                        Color = jobType.color
+                    },
+                    // If no matching customer, the properties will be null
+                    Customer = customer == null
+                        ? null
+                        : new Customer
+                        {
+                            id = customer.id,
+                            FirstName = customer.FirstName,
+                            LastName = customer.LastName,
+                            Email = customer.Email,
+                            Phone = customer.Phone,
+                            DOB = customer.DOB,
+                            created_at = customer.created_at,
+                            postal_address = customer.postal_address,
+                            notes = customer.notes,
+                            modified_at = customer.modified_at
+                        },
+                    // If no matching vehicle, the properties will be null
+                    Vehicle = vehicle == null
+                        ? null
+                        : new Vehicle
+                        {
+                            id = vehicle.id,
+                            customerid = vehicle.customerid,
+                            owner = vehicle.owner,
+                            make = vehicle.make,
+                            description = vehicle.description,
+                            model = vehicle.model,
+                            rego = vehicle.rego,
+                            vin = vehicle.vin,
+                            year = vehicle.year
+                        }
+                };
+
+            return await query.ToListAsync();
         }
-        
+
         public async Task<Job> AddJobAsync(Job job)
         {
             await EnsureContextInitializedAsync();
@@ -43,10 +108,54 @@ namespace hoistmt.Services.lib
             await _context.SaveChangesAsync();
             return job;
         }
+        
+        public async Task<Job> UpdateJobAsync(int jobboardId, int jobId, Job updatedJob)
+        {
+            await EnsureContextInitializedAsync();
+
+            // Find the job by JobBoardId and JobId
+            var job = await _context.jobs
+                .FirstOrDefaultAsync(j => j.JobId == jobId && j.JobBoardID == jobboardId);
+
+            if (job == null)
+            {
+                return null; // Return null if the job doesn't exist
+            }
+
+            // No updates performed yet, just returning the job
+            return job; 
+        }
+        
+        public async Task<Job> UpdateJobBoardIdAsync(int jobId, int newJobBoardId)
+        {
+            await EnsureContextInitializedAsync();
+
+            // Find the job by JobId
+            var job = await _context.jobs
+                .FirstOrDefaultAsync(j => j.JobId == jobId);
+
+            if (job == null)
+            {
+                return null; // Return null if the job doesn't exist
+            }
+
+            // Update the jobBoardID
+            job.JobBoardID = newJobBoardId;
+
+            // Save changes to the database
+            _context.jobs.Update(job);
+            await _context.SaveChangesAsync();
+
+            return job; // Return the updated job
+        }
+
+
+
 
         public async Task<IEnumerable<JobWithDetails>> GetJobsByAppointmentId(int appointmentId)
         {
             await EnsureContextInitializedAsync();
+
             return await _context.jobs
                 .Where(j => j.AppointmentId == appointmentId)
                 .Select(j => new JobWithDetails
@@ -62,14 +171,18 @@ namespace hoistmt.Services.lib
                     JobStatus = new JobStatusDetails
                     {
                         Id = j.JobStatusID,
-                        Title = _context.jobstatus.Where(js => js.id == j.JobStatusID).Select(js => js.title).FirstOrDefault(),
-                        Color = _context.jobstatus.Where(js => js.id == j.JobStatusID).Select(js => js.color).FirstOrDefault()
+                        Title = _context.jobstatus.Where(js => js.id == j.JobStatusID).Select(js => js.title)
+                            .FirstOrDefault(),
+                        Color = _context.jobstatus.Where(js => js.id == j.JobStatusID).Select(js => js.color)
+                            .FirstOrDefault()
                     },
                     JobType = new JobTypeDetails
                     {
                         Id = j.JobTypeID,
-                        Title = _context.jobtypes.Where(jt => jt.id == j.JobTypeID).Select(jt => jt.title).FirstOrDefault(),
-                        Color = _context.jobtypes.Where(jt => jt.id == j.JobTypeID).Select(jt => jt.color).FirstOrDefault()
+                        Title = _context.jobtypes.Where(jt => jt.id == j.JobTypeID).Select(jt => jt.title)
+                            .FirstOrDefault(),
+                        Color = _context.jobtypes.Where(jt => jt.id == j.JobTypeID).Select(jt => jt.color)
+                            .FirstOrDefault()
                     }
                 })
                 .ToListAsync();
@@ -80,13 +193,13 @@ namespace hoistmt.Services.lib
             await EnsureContextInitializedAsync();
             return await _context.jobs.FindAsync(id);
         }
-        
+
         public async Task<IEnumerable<Job>> GetJobsByCustomerId(int customerId)
         {
             await EnsureContextInitializedAsync();
             return await _context.jobs.Where(j => j.CustomerId == customerId).ToListAsync();
         }
-        
+
         public async Task DeleteJob(int jobId)
         {
             await EnsureContextInitializedAsync();
@@ -95,22 +208,23 @@ namespace hoistmt.Services.lib
             {
                 throw new NotFoundException("Job not found.");
             }
+
             _context.jobs.Remove(job);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Job>> SearchJobs(string searchTerm)
-        {
-            await EnsureContextInitializedAsync();
-
-            if (string.IsNullOrWhiteSpace(searchTerm))
-                return await GetJobsAsync();
-
-            return await _context.jobs
-                .Where(j => j.Notes.ToLower().Contains(searchTerm.ToLower()) ||
-                            j.JobId.ToString().Contains(searchTerm))
-                .ToListAsync();
-        }
+        // public async Task<IEnumerable<JobWithDetails>> SearchJobs(string searchTerm)
+        // {
+        //     await EnsureContextInitializedAsync();
+        //
+        //     if (string.IsNullOrWhiteSpace(searchTerm))
+        //         return await GetJobsAsync();
+        //
+        //     return await _context.jobs
+        //         .Where(j => j.Notes.ToLower().Contains(searchTerm.ToLower()) ||
+        //                     j.JobId.ToString().Contains(searchTerm))
+        //         .ToListAsync();
+        // }
 
         public async Task<Job> UpdateJob(Job job)
         {
@@ -120,12 +234,11 @@ namespace hoistmt.Services.lib
             {
                 throw new NotFoundException("Job not found");
             }
-            
+
             // Update the properties of the existing job
             existingJob.CustomerId = job.CustomerId;
             existingJob.VehicleId = job.VehicleId;
             existingJob.TechnicianId = job.TechnicianId;
-
 
 
             existingJob.Notes = job.Notes;
@@ -171,6 +284,7 @@ namespace hoistmt.Services.lib
             {
                 throw new NotFoundException("Job status not found");
             }
+
             _context.jobstatus.Remove(status);
             await _context.SaveChangesAsync();
         }
@@ -189,6 +303,7 @@ namespace hoistmt.Services.lib
             {
                 throw new NotFoundException("Job status not found");
             }
+
             return status;
         }
 
@@ -206,6 +321,7 @@ namespace hoistmt.Services.lib
             {
                 throw new NotFoundException("Job type not found");
             }
+
             return jobType;
         }
 
@@ -217,6 +333,7 @@ namespace hoistmt.Services.lib
             {
                 throw new NotFoundException("Job type not found");
             }
+
             existingJobType.title = jobType.title;
             existingJobType.color = jobType.color;
             await _context.SaveChangesAsync();
@@ -239,10 +356,9 @@ namespace hoistmt.Services.lib
             {
                 throw new NotFoundException("Job type not found");
             }
+
             _context.jobtypes.Remove(jobType);
             await _context.SaveChangesAsync();
         }
-
-        
     }
 }
