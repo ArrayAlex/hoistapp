@@ -26,7 +26,7 @@ namespace hoistmt.Controllers
         {
             try
             {
-                var customers = await _customerSevice.GetCustomers();
+                var customers = await _customerSevice.GetCustomerDetails();
                 return Ok(customers);
             }
             catch (UnauthorizedException ex)
