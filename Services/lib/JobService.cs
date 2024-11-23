@@ -293,6 +293,8 @@ namespace hoistmt.Services.lib
             existingJob.Notes = job.Notes;
 
             existingJob.UpdatedAt = nzTime;
+            existingJob.JobStatusID = job.JobStatusID;
+            existingJob.JobTypeID = job.JobTypeID;
 
             await _context.SaveChangesAsync();
             return existingJob;
