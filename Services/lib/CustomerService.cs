@@ -103,6 +103,10 @@ public class CustomerService : IDisposable
     public async Task<Customer> UpdateCustomer(Customer customer)
     {
         await EnsureContextInitializedAsync();
+        TimeZoneInfo nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById("New Zealand Standard Time");
+
+// Convert UTC to New Zealand Time
+        DateTime nzTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, nzTimeZone);
         var existingCustomer = await _context.customers.FirstOrDefaultAsync(c => c.id == customer.id);
         var userid = _httpContextAccessor.HttpContext.Session.GetInt32("userid");
         
@@ -111,6 +115,7 @@ public class CustomerService : IDisposable
         existingCustomer.Email = customer.Email;
         existingCustomer.Phone = customer.Phone;
         existingCustomer.updated_by = userid;
+        existingCustomer.modified_at = nzTime;
         
         await _context.SaveChangesAsync();
         return existingCustomer;
@@ -119,6 +124,10 @@ public class CustomerService : IDisposable
     public async Task<Customer> AddCustomer(Customer customer)
     {
         await EnsureContextInitializedAsync();
+        TimeZoneInfo nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById("New Zealand Standard Time");
+
+// Convert UTC to New Zealand Time
+        DateTime nzTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, nzTimeZone);
         var userid = _httpContextAccessor.HttpContext.Session.GetInt32("userid");
         var CustomerEntity = new Customer
         {
@@ -127,7 +136,8 @@ public class CustomerService : IDisposable
             Email = customer.Email,
             Phone = customer.Phone,
             updated_by = userid,
-            created_by = userid
+            created_by = userid,
+            modified_at = nzTime
         };
         
         _context.customers.Add(CustomerEntity);
