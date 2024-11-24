@@ -1,5 +1,6 @@
 using hoistmt.Exceptions;
 using hoistmt.Interfaces;
+using hoistmt.Models;
 using hoistmt.Services;
 using hoistmt.Services.lib;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,7 @@ namespace hoistmt.Controllers
 
 
         [HttpGet("Invoices")]
-        public async Task<ActionResult<IEnumerable<Invoice>>> GetInvoices()
+        public async Task<ActionResult<IEnumerable<object>>> GetInvoices()
         {
             try
             {
@@ -44,7 +45,7 @@ namespace hoistmt.Controllers
             {
                 // Log the exception
                 System.Diagnostics.Trace.WriteLine($"Error fetching Invoices: {ex.Message}");
-                return StatusCode(500, "Internal Server Error");
+                return StatusCode(500, $"Internal Server Error {ex.Message}");
             }
         }
 
@@ -71,30 +72,30 @@ namespace hoistmt.Controllers
         }
 
 
-        [HttpGet("Invoices/ByVehicle")]
-        public async Task<ActionResult<Invoice>> GetInvoicesByVehicleId([FromQuery] int vehicleId)
-        {
-            try
-            {
-                // Find the vehicle by ID
-                var invoices = await _invoiceService.GetInvoicesByVehicleId(vehicleId);
-                return Ok(invoices);
-            }
-            catch (UnauthorizedException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                System.Diagnostics.Trace.WriteLine($"Error fetching Customer by Vehicle ID: {ex.Message}");
-                return StatusCode(500, "Internal Server Error");
-            }
-        }
+        // [HttpGet("Invoices/ByVehicle")]
+        // public async Task<ActionResult<Invoice>> GetInvoicesByVehicleId([FromQuery] int vehicleId)
+        // {
+        //     try
+        //     {
+        //         // Find the vehicle by ID
+        //         var invoices = await _invoiceService.GetInvoicesByVehicleId(vehicleId);
+        //         return Ok(invoices);
+        //     }
+        //     catch (UnauthorizedException ex)
+        //     {
+        //         return Unauthorized(ex.Message);
+        //     }
+        //     catch (NotFoundException ex)
+        //     {
+        //         return NotFound(ex.Message);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         // Log the exception
+        //         System.Diagnostics.Trace.WriteLine($"Error fetching Customer by Vehicle ID: {ex.Message}");
+        //         return StatusCode(500, "Internal Server Error");
+        //     }
+        // }
 
         [HttpPut("update")]
         public async Task<IActionResult> UpdateInvoice([FromBody] Invoice invoice)
@@ -138,6 +139,20 @@ namespace hoistmt.Controllers
             }
         }
 
+        // [HttpPost("create")]
+        // public async Task<IActionResult> CreateInvoice([FromBody] InvoiceDTO invoiceData)
+        // {
+        //     try
+        //     {
+        //         var invoiceId = await _invoiceService.CreateInvoice(invoiceData);
+        //         return Ok(new { id = invoiceId });
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return BadRequest(new { error = ex.Message });
+        //     }
+        // }        
+        //
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteInvoice([FromQuery] int invoiceId)
         {

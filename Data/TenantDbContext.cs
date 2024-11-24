@@ -14,6 +14,7 @@ public class TenantDbContext : DbContext
 
     public DbSet<Vehicle> vehicles { get; set; }
     public DbSet<Job> jobs { get; set; }
+    public DbSet<InvoiceItem> invoiceitems { get; set; }
     public DbSet<JobStatus> jobstatus { get; set; }
 
     public DbSet<BookingStatus> bookingstatus { get; set; }
@@ -30,6 +31,7 @@ public class TenantDbContext : DbContext
     public DbSet<Customer> customers { get; set; }
     public DbSet<invoiceEntry> invoiceEntries { get; set; }
     public DbSet<Invoice> invoices { get; set; }
+    public DbSet<AdhocEntry> adhocentries { get; set; }
     public DbSet<eventAttribute> eventAttributes { get; set; }
 
     

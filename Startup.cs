@@ -71,6 +71,8 @@ public class Startup
         services.AddScoped<TenantService>();
         services.AddScoped<TokenHandler>();
         services.AddScoped<Credits>();
+        services.AddScoped<LibraryInvoiceService>();
+        services.AddScoped<MiscService>();
         services.AddScoped<JobService>();
         services.AddScoped<EmailService>();
         services.AddScoped<TechnicianService>();

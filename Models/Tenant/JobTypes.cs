@@ -10,6 +10,7 @@ namespace hoistmt.Models
 
         [Key]
         public int id {get; set;}
+        public int hourly_rate {get; set;}
 
         public string title {get; set;}
 

@@ -9,14 +9,13 @@ using SendGrid.Helpers.Errors.Model;
 
 namespace hoistmt.Services.lib
 {
-    public class JobService
+    public class MiscService
     {
         private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
         private TenantDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public JobService(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver,
-            IHttpContextAccessor httpContextAccessor)
+        public MiscService(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver,IHttpContextAccessor httpContextAccessor)
         {
             _tenantDbContextResolver = tenantDbContextResolver ??
                                        throw new ArgumentNullException(nameof(tenantDbContextResolver));
@@ -35,19 +34,23 @@ namespace hoistmt.Services.lib
             }
         }
 
-        public async Task<IEnumerable<JobWithDetails>> GetJobsAsync()
+      /*public async Task<IEnumerable<JobWithDetails>> GetJobsAsync()
         {
             await EnsureContextInitializedAsync();
 
             var query = from job in _context.jobs
                 join jobStatus in _context.jobstatus on job.JobStatusID equals jobStatus.id
                 join jobType in _context.jobtypes on job.JobTypeID equals jobType.id
+                
                 join vehicle in _context.vehicles on job.VehicleId equals vehicle.id into vehicleJoin
-                from vehicle in vehicleJoin.DefaultIfEmpty()
+                from vehicle in vehicleJoin.DefaultIfEmpty() 
+                
                 join customer in _context.customers on job.CustomerId equals customer.id into customerJoin
-                from customer in customerJoin.DefaultIfEmpty()
+                from customer in customerJoin.DefaultIfEmpty() 
+                
                 join account in _context.accounts on job.TechnicianId equals account.Id into accountJoin
-                from account in accountJoin.DefaultIfEmpty()
+                from account in accountJoin.DefaultIfEmpty() 
+                
                 select new JobWithDetails
                 {
                     JobId = job.JobId,
@@ -58,6 +61,7 @@ namespace hoistmt.Services.lib
                     UpdatedAt = job.UpdatedAt,
                     CreatedAt = job.CreatedAt,
                     hours_worked = job.hours_worked,
+                    //AppointmentId = job.AppointmentId,
                     JobBoardID = job.JobBoardID,
                     CreatedBy = job.CreatedBy,
                     JobStatus = new JobStatusDetails
@@ -72,6 +76,7 @@ namespace hoistmt.Services.lib
                         Title = jobType.title,
                         Color = jobType.color
                     },
+                    // If no matching customer, the properties will be null
                     Customer = customer == null
                         ? null
                         : new Customer
@@ -87,6 +92,7 @@ namespace hoistmt.Services.lib
                             notes = customer.notes,
                             modified_at = customer.modified_at
                         },
+                    // If no matching vehicle, the properties will be null
                     Vehicle = vehicle == null
                         ? null
                         : new Vehicle
@@ -107,16 +113,16 @@ namespace hoistmt.Services.lib
                         {
                             Id = account.Id,
                             Name = account.Name
-                        },
-                    Amount = (job.hours_worked.HasValue && jobType.hourly_rate > 0 && jobType.hourly_rate > 0)
-                        ? job.hours_worked.Value * jobType.hourly_rate
-                        : (float?)null
+ 
+
+                        }
+                    
                 };
 
             return await query.ToListAsync();
-        }
+        }*/
 
-        public async Task<Job> AddJobAsync(NewJob newJob)
+        /*public async Task<Job> AddJobAsync(NewJob newJob)
         {
             await EnsureContextInitializedAsync();
             await EnsureContextInitializedAsync();
@@ -134,7 +140,7 @@ namespace hoistmt.Services.lib
                 TechnicianId = newJob.TechnicianId,
                 Notes = newJob.Notes,
                 JobStatusID = newJob.jobStatusId,
-                hours_worked = newJob.hours_worked,
+                hours_worked =  newJob.hours_worked,
                 JobTypeID = newJob.jobTypeId,
                 JobBoardID = newJob.JobBoardID,
                 AppointmentId = newJob.AppointmentId,
@@ -148,8 +154,8 @@ namespace hoistmt.Services.lib
             await _context.SaveChangesAsync(); // Save to database
 
             return job;
-        }
-
+        }*/
+        
         public async Task<Job> UpdateJobAsync(int jobboardId, int jobId, Job updatedJob)
         {
             await EnsureContextInitializedAsync();
@@ -164,9 +170,9 @@ namespace hoistmt.Services.lib
             }
 
             // No updates performed yet, just returning the job
-            return job;
+            return job; 
         }
-
+        
         public async Task<Job> UpdateJobBoardIdAsync(int jobId, int newJobBoardId)
         {
             await EnsureContextInitializedAsync();
@@ -194,6 +200,8 @@ namespace hoistmt.Services.lib
 
             return job; // Return the updated job
         }
+
+
 
 
         // public async Task<IEnumerable<JobWithDetails>> GetJobsByAppointmentId(int appointmentId)
@@ -283,7 +291,7 @@ namespace hoistmt.Services.lib
             existingJob.CustomerId = job.CustomerId;
             existingJob.VehicleId = job.VehicleId;
             existingJob.TechnicianId = job.TechnicianId;
-
+        
             var userid = _httpContextAccessor.HttpContext.Session.GetInt32("userid");
             TimeZoneInfo nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById("New Zealand Standard Time");
             DateTime nzTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, nzTimeZone);
@@ -312,7 +320,7 @@ namespace hoistmt.Services.lib
             searchTerm = searchTerm.Trim().ToLower();
 
             var jobs = await _context.jobs
-                .Where(j =>
+                .Where(j => 
                     j.JobId.ToString().Contains(searchTerm) ||
                     j.CustomerId.ToString().Contains(searchTerm) ||
                     j.VehicleId.ToString().Contains(searchTerm) ||
@@ -336,7 +344,7 @@ namespace hoistmt.Services.lib
             return jobs;
         }
 
-
+        
         // public async Task<Job> UpdateJobStatus(int jobId, int statusId)
         // {
         //     await EnsureContextInitializedAsync();

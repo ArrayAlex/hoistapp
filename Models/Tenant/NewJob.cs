@@ -22,6 +22,7 @@ namespace hoistmt.Models
 
         public int? jobStatusId { get; set; }
         public int? jobTypeId { get; set; }
+        public int? hours_worked { get; set; }
 
         public int? AppointmentId { get; set; }
 

@@ -45,6 +45,7 @@ public class CustomerService : IDisposable
             .Where(c => c.FirstName.ToLower().Contains(searchTerm.ToLower()) ||
                         c.LastName.ToLower().Contains(searchTerm.ToLower()) ||
                         c.Email.ToLower().Contains(searchTerm.ToLower()) ||
+                        c.id.Equals(searchTerm.ToLower()) ||
                         c.Phone.Contains(searchTerm))
             .ToListAsync();
 

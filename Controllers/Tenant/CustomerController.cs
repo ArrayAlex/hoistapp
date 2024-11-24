@@ -112,6 +112,7 @@ namespace hoistmt.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
+
         
         [HttpPut("update")]
         public async Task<IActionResult> UpdateCustomer([FromBody] Customer customer)

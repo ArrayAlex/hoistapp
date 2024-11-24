@@ -18,13 +18,16 @@ namespace hoistmt.Models
     public DateTime? CreatedAt { get; set; }
     public int? AppointmentId { get; set; }
     public int?  JobBoardID { get; set; }
+    public int?  hours_worked { get; set; }
     public int? CreatedBy { get; set; }
+    public float? Amount { get; set; }
     
     public JobStatusDetails JobStatus { get; set; }
     public JobTypeDetails JobType { get; set; }
     public Customer  Customer { get; set; }
     public Vehicle Vehicle { get; set; }
     public Technician Technician { get; set; }
+
 }
 
 public class JobStatusDetails

@@ -122,24 +122,25 @@ namespace hoistmt.Controllers
         }
 
 
-        // [HttpGet("search")]
-        // public async Task<ActionResult<IEnumerable<Job>>> SearchJobs([FromQuery] string searchTerm)
-        // {
-        //     try
-        //     {
-        //         var jobs = await _jobService.SearchJobs(searchTerm);
-        //         return Ok(jobs);
-        //     }
-        //     catch (UnauthorizedException ex)
-        //     {
-        //         return Unauthorized(ex.Message);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         System.Diagnostics.Trace.WriteLine($"Error searching Jobs: {ex.Message}");
-        //         return StatusCode(500, "Internal Server Error");
-        //     }
-        // }
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<Customer>>> SearchJobs([FromQuery] string searchTerm)
+        {
+            try
+            {
+                var jobs = await _jobService.SearchJobs(searchTerm);
+                return Ok(jobs);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"Error searching Jobs: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+       
 
         [HttpGet("customer/{customerId}")]
         public async Task<IActionResult> GetJobsByCustomerId(int customerId)

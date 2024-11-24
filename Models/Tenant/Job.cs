@@ -38,6 +38,9 @@ namespace hoistmt.Models
         [Column("JobBoardID")]
         public int? JobBoardID { get; set; }
         
+        [Column("hours_worked")]
+        public int? hours_worked { get; set; }
+        
         [Column("AppointmentId")]
         public int? AppointmentId { get; set; }
         
@@ -46,5 +49,7 @@ namespace hoistmt.Models
         
         [Column("updated_by")]
         public int? updated_by { get; set; }
+        [Column("invoice_id")]
+        public int? invoice_id { get; set; }
     }
 }
