@@ -156,7 +156,9 @@ public class LibraryInvoiceService : IDisposable
                     .Select(c => new
                     {
                         c.FirstName,
-                        c.LastName // Example if you want additional attributes
+                        c.LastName,
+                        c.Email,
+                        c.Phone
                     })
                     .FirstOrDefault(), // Fetch the first matching customer or null if none exists
                 jobs = new List<object>(),  // Replace with actual job data logic
