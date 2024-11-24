@@ -143,6 +143,7 @@ public class LibraryInvoiceService : IDisposable
     {
         await EnsureContextInitializedAsync();
         var customers = await _context.customers.ToListAsync();
+
         // Step 1: Get all invoices
         var invoices = await _context.invoices
             .Select(invoice => new
@@ -160,41 +161,47 @@ public class LibraryInvoiceService : IDisposable
                         c.Email,
                         c.Phone
                     })
-                    .FirstOrDefault(), // Fetch the first matching customer or null if none exists
-                jobs = new List<object>(),  // Replace with actual job data logic
-                adhoc = new List<object>()  // Replace with actual adhoc data logic
+                    .FirstOrDefault(),
+                jobs = new List<object>(),
+                adhoc = new List<object>()
             })
             .ToListAsync();
 
         // Step 2: Get all jobs, adhoc entries, and jobtypes
         var jobs = await _context.jobs.ToListAsync();
         var adhoc = await _context.adhocentries.ToListAsync();
-        var jobTypes = await _context.jobtypes.ToListAsync(); // Assuming this table contains jobtypeid and hourly_rate
+        var jobTypes = await _context.jobtypes.ToListAsync();
 
-        foreach (var invoice in invoices)
+        // Step 3: Create new list with calculated totals
+        var result = invoices.Select(invoice =>
         {
-            // Find the jobs that match the current invoice's invoice_id
+            decimal invoiceTotal = 0m;
+
+            // Calculate jobs total
             var matchingJobs = jobs.Where(job => job.invoice_id == invoice.invoice_id)
-                .Select(job => new
+                .Select(job =>
                 {
-                    job.JobId,
-                    job.Notes,
-                    job.hours_worked,
-                    amount = job.hours_worked > 0
-                        ? jobTypes
-                            .Where(jt => jt.id == job.JobTypeID)
-                            .Select(jt =>
-                                jt.hourly_rate *
-                                job.hours_worked) // Calculate amount based on hourly_rate * hours_worked
-                            .FirstOrDefault() // Assuming only one match will exist for each jobtypeid
-                        : 0 // Set amount to 0 if hours_worked is 0 or less
+                    var jobType = jobTypes.FirstOrDefault(jt => jt.id == job.JobTypeID);
+                    decimal amount = 0m;
+
+                    if (job.hours_worked.HasValue && jobType?.hourly_rate > 0)
+                    {
+                        amount = jobType.hourly_rate * job.hours_worked.Value;
+                    }
+
+                    invoiceTotal += amount;
+
+                    return new
+                    {
+                        job.JobId,
+                        job.Notes,
+                        job.hours_worked,
+                        amount
+                    };
                 })
                 .ToList();
 
-            // Add the jobs to the invoice's jobs list
-            invoice.jobs.AddRange(matchingJobs);
-
-            // Find the adhoc entries that match the current invoice's invoice_id
+            // Calculate adhoc total
             var matchingAdhoc = adhoc.Where(a => a.invoice_id == invoice.invoice_id)
                 .Select(a => new
                 {
@@ -204,15 +211,26 @@ public class LibraryInvoiceService : IDisposable
                 })
                 .ToList();
 
-            // Add the adhoc entries to the invoice's adhoc list
-            invoice.adhoc.AddRange(matchingAdhoc);
-        }
+            // Add adhoc amounts to invoice total
+            invoiceTotal += matchingAdhoc.Sum(a => a.Amount);
 
-        // Return the list of invoices with their corresponding jobs and adhoc entries
-        return invoices;
+            // Create new anonymous object with all properties including calculated total
+            return new
+            {
+                invoice.invoice_id,
+                invoice.customerid,
+                invoice.invoice_date,
+                total_amount = invoiceTotal,
+                invoice.customer,
+                jobs = matchingJobs,
+                adhoc = matchingAdhoc
+            };
+        }).ToList();
+
+        return result;
     }
 
-    // public async Task<List<InvoiceResponse>> GetInvoicesAsync()
+// public async Task<List<InvoiceResponse>> GetInvoicesAsync()
     // {
     //     var invoices = await _context.invoices
     //         .Include(i => i.Jobs)
