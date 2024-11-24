@@ -73,8 +73,6 @@ public class AuthService : IDisposable
             throw new NotFoundException("Plan not found");
         }
 
-        
-
         httpContext.Session.SetInt32("PlanID", plan.id);
         httpContext.Session.SetString("PlanName", plan.PlanName);
         httpContext.Session.SetInt32("StorageLimitGB", plan.StorageLimitGB);
@@ -103,6 +101,7 @@ public class AuthService : IDisposable
        
         return new
         {
+            userid = account.Id,
             success = true,
             newUser = newUser.New,
             Plan = new
