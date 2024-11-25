@@ -277,14 +277,12 @@ public class LibraryInvoiceService : IDisposable
         // Calculate subtotal
         invoice.Subtotal = (int)invoice.LineItems.Sum(li => (li.Rate ?? 0) * (li.Hours ?? 0));
 
+        invoice.DiscountAmount = (invoice.Discount / 100) * invoice.Subtotal;
         // Calculate tax amount
         invoice.TaxAmount = invoice.TaxRate.HasValue ? (int)(invoice.Subtotal * (invoice.TaxRate / (decimal)100.0)) : 0;
 
-        // Calculate discount amount
-        invoice.DiscountAmount = (invoice.Discount / 100) * invoice.Subtotal;
-
         // Calculate total
-        invoice.Total = invoice.Subtotal + invoice.TaxAmount - invoice.DiscountAmount;
+        invoice.Total = invoice.Subtotal - invoice.DiscountAmount + invoice.TaxAmount ;
     }
 
     public void Dispose()
