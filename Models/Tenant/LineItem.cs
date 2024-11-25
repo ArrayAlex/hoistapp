@@ -8,7 +8,7 @@ namespace hoistmt.Models.Tenant
     public class LineItem
     {
         [Key]
-        public long Id { get; set; }
+        public long? Id { get; set; }
 
         [Column("invoice_id")]
         public int invoice_id { get; set; }  // Changed to int to match Invoice.invoice_id
@@ -17,7 +17,7 @@ namespace hoistmt.Models.Tenant
         public decimal? Rate { get; set; }
         public int? Hours { get; set; }
         public string? Type { get; set; }
-
+        public int? itemID { get; set; }
         [ForeignKey("invoice_id")]
         [JsonIgnore] 
         public virtual Invoice? Invoice { get; set; }

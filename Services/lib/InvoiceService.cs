@@ -91,7 +91,7 @@ public class LibraryInvoiceService : IDisposable
         }
     }
 
-    public async Task<Invoice> UpdateInvoiceAsync(int id, Invoice updatedInvoice)
+    public async Task<object> UpdateInvoiceAsync(int id, Invoice updatedInvoice)
     {
         await EnsureContextInitializedAsync();
 
@@ -119,56 +119,76 @@ public class LibraryInvoiceService : IDisposable
             existingInvoice.updated_at = DateTime.UtcNow;
 
             // Handle line items
-            foreach (var updatedItem in updatedInvoice.LineItems ?? Enumerable.Empty<LineItem>())
+            if (updatedInvoice.LineItems != null)
             {
-                var existingItem = existingInvoice.LineItems?
-                    .FirstOrDefault(li => li.Id == updatedItem.Id);
+                var existingLineItems = existingInvoice.LineItems?.ToList() ?? new List<LineItem>();
+                var updatedLineItems = new List<LineItem>();
 
-                if (existingItem != null)
+                foreach (var updatedItem in updatedInvoice.LineItems)
                 {
-                    // Update existing line item
-                    existingItem.Title = updatedItem.Title;
-                    existingItem.Rate = updatedItem.Rate;
-                    existingItem.Hours = updatedItem.Hours;
-                    existingItem.Type = updatedItem.Type;
-                }
-                else if (updatedItem.Id == 0)
-                {
-                    // This is a new line item
-                    updatedItem.invoice_id = id;
-                    _context.LineItems.Add(updatedItem);
-                }
-                // If item has an ID but wasn't found, ignore it
-            }
+                    if (updatedItem.Id != null && updatedItem.Id > 0)
+                    {
+                        // Update existing line item
+                        var existingItem = existingLineItems
+                            .FirstOrDefault(li => li.Id == updatedItem.Id);
 
-            // Remove any line items that are no longer present
-            if (existingInvoice.LineItems != null)
-            {
-                var updatedItemIds = updatedInvoice.LineItems?
-                    .Select(li => li.Id)
-                    .ToList() ?? new List<long>();
+                        if (existingItem != null)
+                        {
+                            existingItem.Title = updatedItem.Title;
+                            existingItem.Rate = updatedItem.Rate;
+                            existingItem.Hours = updatedItem.Hours;
+                            existingItem.Type = updatedItem.Type?.ToLower(); // Normalize type to lowercase
+                            existingItem.itemID = updatedItem.itemID;
+                            updatedLineItems.Add(existingItem);
+                        }
+                    }
+                    else
+                    {
+                        // This is a new line item
+                        var newLineItem = new LineItem
+                        {
+                            invoice_id = id,
+                            Title = updatedItem.Title,
+                            Rate = updatedItem.Rate,
+                            Hours = updatedItem.Hours,
+                            Type = updatedItem.Type?.ToLower(), // Normalize type to lowercase
+                            itemID = updatedItem.itemID
+                        };
 
-                var itemsToRemove = existingInvoice.LineItems
-                    .Where(li => !updatedItemIds.Contains(li.Id))
+                        _context.LineItems.Add(newLineItem);
+                        updatedLineItems.Add(newLineItem);
+                    }
+                }
+
+                // Remove line items that are no longer present
+                var itemsToRemove = existingLineItems
+                    .Where(existing => !updatedLineItems.Contains(existing))
                     .ToList();
 
-                _context.LineItems.RemoveRange(itemsToRemove);
+                if (itemsToRemove.Any())
+                {
+                    _context.LineItems.RemoveRange(itemsToRemove);
+                }
             }
 
-            // Save changes and recalculate totals
+            // Save changes to persist new line items and updates
             await _context.SaveChangesAsync();
+
+            // Recalculate totals
             await CalculateInvoiceTotals(existingInvoice);
+
+            // Save the recalculated totals
             await _context.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
-            // Reload the invoice with all related data
+            // Return the updated invoice
             return await GetInvoiceAsync(id);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw;
+            throw new Exception($"Failed to update invoice: {ex.Message}", ex);
         }
     }
 
@@ -189,103 +209,6 @@ public class LibraryInvoiceService : IDisposable
         return invoice;
     }
 
-    /*public async Task<Invoice> CreateInvoiceAsync(Invoice invoice)
-    {
-        await EnsureContextInitializedAsync();
-
-        using var transaction = await _context.Database.BeginTransactionAsync();
-
-        try
-        {
-            // Set creation timestamps
-            var now = DateTime.UtcNow;
-            invoice.created_at = now;
-            invoice.updated_at = now;
-
-            // Calculate totals
-            await CalculateInvoiceTotals(invoice);
-
-            // Add the invoice
-            _context.invoices.Add(invoice);
-            await _context.SaveChangesAsync();
-
-            // Update line items with the new invoice ID
-            if (invoice.LineItems != null)
-            {
-                foreach (var item in invoice.LineItems)
-                {
-                    item.invoice_id = invoice.invoice_id;
-                }
-                await _context.SaveChangesAsync();
-            }
-
-            await transaction.CommitAsync();
-            return invoice;
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
-    }*/
-
-    /*public async Task<Invoice> UpdateInvoiceAsync(int id, Invoice updatedInvoice)
-    {
-        await EnsureContextInitializedAsync();
-
-        using var transaction = await _context.Database.BeginTransactionAsync();
-
-        try
-        {
-            var existingInvoice = await _context.invoices
-                .Include(i => i.LineItems)
-                .FirstOrDefaultAsync(i => i.invoice_id == id);
-
-            if (existingInvoice == null)
-            {
-                throw new NotFoundException($"Invoice with ID {id} not found.");
-            }
-
-            // Update basic properties
-            existingInvoice.Status = updatedInvoice.Status;
-            existingInvoice.PaymentTerms = updatedInvoice.PaymentTerms;
-            existingInvoice.Notes = updatedInvoice.Notes;
-            existingInvoice.TaxRate = updatedInvoice.TaxRate;
-            existingInvoice.Discount = updatedInvoice.Discount;
-            existingInvoice.customerid = updatedInvoice.customerid;
-            existingInvoice.dueDate = updatedInvoice.dueDate;
-            existingInvoice.updated_at = DateTime.UtcNow;
-
-            // Update line items
-            if (existingInvoice.LineItems != null)
-            {
-                _context.LineItems.RemoveRange(existingInvoice.LineItems);
-            }
-
-            if (updatedInvoice.LineItems != null)
-            {
-                foreach (var item in updatedInvoice.LineItems)
-                {
-                    item.invoice_id = id;
-                }
-                existingInvoice.LineItems = updatedInvoice.LineItems;
-            }
-
-            // Recalculate totals
-            await CalculateInvoiceTotals(existingInvoice);
-
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return existingInvoice;
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
-    }
-    */
 
     public async Task DeleteInvoiceAsync(int id)
     {
@@ -383,3 +306,102 @@ public class LibraryInvoiceService : IDisposable
         }
     }
 }
+
+
+/*public async Task<Invoice> CreateInvoiceAsync(Invoice invoice)
+{
+    await EnsureContextInitializedAsync();
+
+    using var transaction = await _context.Database.BeginTransactionAsync();
+
+    try
+    {
+        // Set creation timestamps
+        var now = DateTime.UtcNow;
+        invoice.created_at = now;
+        invoice.updated_at = now;
+
+        // Calculate totals
+        await CalculateInvoiceTotals(invoice);
+
+        // Add the invoice
+        _context.invoices.Add(invoice);
+        await _context.SaveChangesAsync();
+
+        // Update line items with the new invoice ID
+        if (invoice.LineItems != null)
+        {
+            foreach (var item in invoice.LineItems)
+            {
+                item.invoice_id = invoice.invoice_id;
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        await transaction.CommitAsync();
+        return invoice;
+    }
+    catch (Exception)
+    {
+        await transaction.RollbackAsync();
+        throw;
+    }
+}*/
+
+/*public async Task<Invoice> UpdateInvoiceAsync(int id, Invoice updatedInvoice)
+{
+    await EnsureContextInitializedAsync();
+
+    using var transaction = await _context.Database.BeginTransactionAsync();
+
+    try
+    {
+        var existingInvoice = await _context.invoices
+            .Include(i => i.LineItems)
+            .FirstOrDefaultAsync(i => i.invoice_id == id);
+
+        if (existingInvoice == null)
+        {
+            throw new NotFoundException($"Invoice with ID {id} not found.");
+        }
+
+        // Update basic properties
+        existingInvoice.Status = updatedInvoice.Status;
+        existingInvoice.PaymentTerms = updatedInvoice.PaymentTerms;
+        existingInvoice.Notes = updatedInvoice.Notes;
+        existingInvoice.TaxRate = updatedInvoice.TaxRate;
+        existingInvoice.Discount = updatedInvoice.Discount;
+        existingInvoice.customerid = updatedInvoice.customerid;
+        existingInvoice.dueDate = updatedInvoice.dueDate;
+        existingInvoice.updated_at = DateTime.UtcNow;
+
+        // Update line items
+        if (existingInvoice.LineItems != null)
+        {
+            _context.LineItems.RemoveRange(existingInvoice.LineItems);
+        }
+
+        if (updatedInvoice.LineItems != null)
+        {
+            foreach (var item in updatedInvoice.LineItems)
+            {
+                item.invoice_id = id;
+            }
+            existingInvoice.LineItems = updatedInvoice.LineItems;
+        }
+
+        // Recalculate totals
+        await CalculateInvoiceTotals(existingInvoice);
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        return existingInvoice;
+    }
+    catch (Exception)
+    {
+        await transaction.RollbackAsync();
+        throw;
+    }
+}
+*/
