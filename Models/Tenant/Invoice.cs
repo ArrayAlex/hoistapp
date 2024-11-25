@@ -20,12 +20,12 @@ public class Invoice
     public string? Status { get; set; }
     public string? PaymentTerms { get; set; }
     public string? Notes { get; set; }
-    public int? TaxRate { get; set; }
-    public int? Discount { get; set; }
-    public int? Subtotal { get; set; }
-    public int? TaxAmount { get; set; }
-    public int? DiscountAmount { get; set; }
-    public int? Total { get; set; }
+    public decimal? TaxRate { get; set; }
+    public decimal? Discount { get; set; }
+    public decimal? Subtotal { get; set; }
+    public decimal? TaxAmount { get; set; }
+    public decimal? DiscountAmount { get; set; }
+    public decimal? Total { get; set; }
     public DateTime? created_at { get; set; }
     public DateTime updated_at { get; set; }
     public DateTime? dueDate { get; set; }

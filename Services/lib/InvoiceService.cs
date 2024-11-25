@@ -278,10 +278,10 @@ public class LibraryInvoiceService : IDisposable
         invoice.Subtotal = (int)invoice.LineItems.Sum(li => (li.Rate ?? 0) * (li.Hours ?? 0));
 
         // Calculate tax amount
-        invoice.TaxAmount = invoice.TaxRate.HasValue ? (int)(invoice.Subtotal * (invoice.TaxRate / 100.0)) : 0;
+        invoice.TaxAmount = invoice.TaxRate.HasValue ? (int)(invoice.Subtotal * (invoice.TaxRate / (decimal)100.0)) : 0;
 
         // Calculate discount amount
-        invoice.DiscountAmount = invoice.Discount ?? 0;
+        invoice.DiscountAmount = (invoice.Discount / 100) * invoice.Subtotal;
 
         // Calculate total
         invoice.Total = invoice.Subtotal + invoice.TaxAmount - invoice.DiscountAmount;
