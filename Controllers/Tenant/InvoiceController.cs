@@ -1,177 +1,193 @@
-using hoistmt.Exceptions;
-using hoistmt.Interfaces;
-using hoistmt.Models;
-using hoistmt.Services;
-using hoistmt.Services.lib;
 using Microsoft.AspNetCore.Mvc;
-
-using Invoice = hoistmt.Models.Invoice;
+using Microsoft.EntityFrameworkCore;
+using hoistmt.Models;
+using hoistmt.Models.Tenant;
+using hoistmt.Services.lib;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using hoistmt.Exceptions;
+using hoistmt.Services;
 
 namespace hoistmt.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class InvoicesController : ControllerBase
     {
-        private readonly ITenantDbContextResolver<TenantDbContext> _tenantDbContextResolver;
         private readonly LibraryInvoiceService _invoiceService;
+        private readonly TenantDbContext _context;
 
-        public InvoicesController(ITenantDbContextResolver<TenantDbContext> tenantDbContextResolver,
-            LibraryInvoiceService invoiceService)
+        public InvoicesController(LibraryInvoiceService invoiceService, TenantDbContext context)
         {
-            _tenantDbContextResolver = tenantDbContextResolver;
             _invoiceService = invoiceService;
+            _context = context;
         }
 
-
-        [HttpGet("Invoices")]
-        public async Task<ActionResult<IEnumerable<object>>> GetInvoices()
+        // GET: api/invoices
+        [HttpGet("invoices")]
+        public async Task<ActionResult<IEnumerable<Invoice>>> GetInvoices()
         {
             try
             {
-                var Invoices = await _invoiceService.GetInvoicesAsync();
-
-                return Ok(Invoices);
+                var invoices = await _invoiceService.GetInvoicesAsync();
+                return Ok(invoices);
             }
-            catch (UnauthorizedException ex)
+            catch (UnauthorizedException)
             {
-                return Unauthorized(ex.Message);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
+                return Unauthorized();
             }
             catch (Exception ex)
             {
-                // Log the exception
-                System.Diagnostics.Trace.WriteLine($"Error fetching Invoices: {ex.Message}");
-                return StatusCode(500, $"Internal Server Error {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpGet("Invoice")]
-        public async Task<IActionResult> GetInvoice([FromQuery] int invoiceId)
+        [HttpPost]
+        public async Task<ActionResult<Invoice>> CreateInvoice([FromBody] InvoiceRequest request)
+        {
+            if (request?.Invoice == null)
+            {
+                return BadRequest("Invalid invoice data");
+            }
+
+            try
+            {
+                var invoice = await _invoiceService.CreateInvoiceAsync(request.Invoice);
+                return CreatedAtAction(nameof(GetInvoice), new { id = invoice.invoice_id }, invoice);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // PUT: api/invoices/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateInvoice(int id, [FromBody] InvoiceRequest request)
+        {
+            if (request?.Invoice == null || id != request.Invoice.invoice_id)
+            {
+                return BadRequest("Invalid invoice data");
+            }
+
+            try
+            {
+                var updatedInvoice = await _invoiceService.UpdateInvoiceAsync(id, request.Invoice);
+                return Ok(updatedInvoice);
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        // GET: api/invoices/5
+        [HttpGet("invoice/{id}")]
+        public async Task<ActionResult<Invoice>> GetInvoice(int id)
         {
             try
             {
-                var invoice = await _invoiceService.GetInvoice(invoiceId);
+                var invoice = await _invoiceService.GetInvoiceAsync(id);
                 return Ok(invoice);
             }
-            catch (UnauthorizedException ex)
+            catch (NotFoundException)
             {
-                return Unauthorized(ex.Message);
+                return NotFound();
             }
-            catch (NotFoundException ex)
+            catch (UnauthorizedException)
             {
-                return NotFound(ex.Message);
+                return Unauthorized();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while processing your request.");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-
-        // [HttpGet("Invoices/ByVehicle")]
-        // public async Task<ActionResult<Invoice>> GetInvoicesByVehicleId([FromQuery] int vehicleId)
+        //
+        // // PUT: api/invoices/5
+        // [HttpPut("{id}")]
+        // public async Task<IActionResult> UpdateInvoice(int id, [FromBody] Invoice updatedInvoice)
         // {
+        //     if (id != updatedInvoice.invoice_id)
+        //     {
+        //         return BadRequest();
+        //     }
+        //
         //     try
         //     {
-        //         // Find the vehicle by ID
-        //         var invoices = await _invoiceService.GetInvoicesByVehicleId(vehicleId);
-        //         return Ok(invoices);
-        //     }
-        //     catch (UnauthorizedException ex)
-        //     {
-        //         return Unauthorized(ex.Message);
-        //     }
-        //     catch (NotFoundException ex)
-        //     {
-        //         return NotFound(ex.Message);
+        //         var existingInvoice = await _context.invoices
+        //             .Include(i => i.LineItems)
+        //             .FirstOrDefaultAsync(i => i.invoice_id == id);
+        //
+        //         if (existingInvoice == null)
+        //         {
+        //             return NotFound();
+        //         }
+        //
+        //         // Update invoice properties
+        //         existingInvoice.Status = updatedInvoice.Status;
+        //         existingInvoice.PaymentTerms = updatedInvoice.PaymentTerms;
+        //         existingInvoice.Notes = updatedInvoice.Notes;
+        //         existingInvoice.TaxRate = updatedInvoice.TaxRate;
+        //         existingInvoice.Discount = updatedInvoice.Discount;
+        //         existingInvoice.dueDate = updatedInvoice.dueDate;
+        //         existingInvoice.customerid = updatedInvoice.customerid;
+        //         existingInvoice.updated_at = DateTime.UtcNow;
+        //
+        //         // Update line items
+        //         _context.LineItems.RemoveRange(existingInvoice.LineItems);
+        //         
+        //         if (updatedInvoice.LineItems != null)
+        //         {
+        //             foreach (var item in updatedInvoice.LineItems)
+        //             {
+        //                 item.invoice_id = id;
+        //             }
+        //             existingInvoice.LineItems = updatedInvoice.LineItems;
+        //         }
+        //
+        //         // Recalculate totals
+        //         existingInvoice.Subtotal = (int)existingInvoice.LineItems?.Sum(li => li.Rate * li.Hours);
+        //         existingInvoice.TaxAmount = existingInvoice.TaxRate.HasValue ? 
+        //             (int)(existingInvoice.Subtotal * (existingInvoice.TaxRate / 100.0)) : 0;
+        //         existingInvoice.DiscountAmount = existingInvoice.Discount ?? 0;
+        //         existingInvoice.Total = existingInvoice.Subtotal + existingInvoice.TaxAmount - existingInvoice.DiscountAmount;
+        //
+        //         await _context.SaveChangesAsync();
+        //
+        //         return NoContent();
         //     }
         //     catch (Exception ex)
         //     {
-        //         // Log the exception
-        //         System.Diagnostics.Trace.WriteLine($"Error fetching Customer by Vehicle ID: {ex.Message}");
-        //         return StatusCode(500, "Internal Server Error");
+        //         return StatusCode(500, $"Internal server error: {ex.Message}");
         //     }
         // }
 
-        [HttpPut("update")]
-        public async Task<IActionResult> UpdateInvoice([FromBody] Invoice invoice)
+        // DELETE: api/invoices/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteInvoice(int id)
         {
             try
             {
-                var invoiceEntity = await _invoiceService.UpdateInvoice(invoice);
-                return Ok(invoiceEntity); // Optionally return the updated invoice
+                await _invoiceService.DeleteInvoiceAsync(id);
+                return NoContent();
             }
-            catch (UnauthorizedException ex)
+            catch (NotFoundException)
             {
-                return Unauthorized(ex.Message);
+                return NotFound();
             }
-            catch (NotFoundException ex)
+            catch (UnauthorizedException)
             {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "An error occurred while processing your request.");
-            }
-        }
-
-        [HttpPost("add")]
-        public async Task<IActionResult> AddInvoice([FromBody] Invoice invoice)
-        {
-            try
-            {
-                var invoiceEntity = await _invoiceService.AddInvoice(invoice);
-                return Ok(invoiceEntity);
-            } catch (UnauthorizedException ex)
-            {
-                return Unauthorized(ex.Message);
-            } catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            } 
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"An error occurred while processing your request. {ex.Message}");
-            }
-        }
-
-        // [HttpPost("create")]
-        // public async Task<IActionResult> CreateInvoice([FromBody] InvoiceDTO invoiceData)
-        // {
-        //     try
-        //     {
-        //         var invoiceId = await _invoiceService.CreateInvoice(invoiceData);
-        //         return Ok(new { id = invoiceId });
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return BadRequest(new { error = ex.Message });
-        //     }
-        // }        
-        //
-        [HttpDelete("delete")]
-        public async Task<IActionResult> DeleteInvoice([FromQuery] int invoiceId)
-        {
-            try
-            {
-                await _invoiceService.DeleteInvoice(invoiceId);
-                return Ok("Invoice deleted successfully");
-            }
-            catch (UnauthorizedException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
+                return Unauthorized();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while processing your request. {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
     }

@@ -30,9 +30,37 @@ public class TenantDbContext : DbContext
     public DbSet<TenantTransactions> tenanttransactions { get; set; }
     public DbSet<Customer> customers { get; set; }
     public DbSet<invoiceEntry> invoiceEntries { get; set; }
+    public DbSet<LineItem> LineItems { get; set; }
     public DbSet<Invoice> invoices { get; set; }
     public DbSet<AdhocEntry> adhocentries { get; set; }
     public DbSet<eventAttribute> eventAttributes { get; set; }
+    
+    // protected override void OnModelCreating(ModelBuilder modelBuilder)
+    // {
+    //     base.OnModelCreating(modelBuilder);
+    //
+    //     modelBuilder.Entity<Invoice>(entity =>
+    //     {
+    //         entity.ToTable("invoices");
+    //         entity.HasKey(e => e.invoice_id);
+    //         
+    //         entity.HasMany(e => e.LineItems)
+    //             .WithOne(e => e.Invoice)
+    //             .HasForeignKey(e => e.invoice_id)
+    //             .OnDelete(DeleteBehavior.Cascade);
+    //     });
+    //
+    //     modelBuilder.Entity<LineItem>(entity =>
+    //     {
+    //         entity.ToTable("lineitems");
+    //         entity.HasKey(e => e.Id);
+    //         
+    //         entity.HasOne(e => e.Invoice)
+    //             .WithMany(e => e.LineItems)
+    //             .HasForeignKey(e => e.invoice_id)
+    //             .OnDelete(DeleteBehavior.Cascade);
+    //     });
+    // }
 
     
 }
